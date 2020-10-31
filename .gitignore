@@ -1,0 +1,6 @@
+# ignore build files
+build/
+mjavac.jar
+src/sym.java
+src/lexer.java
+src/parser.java
