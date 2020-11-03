@@ -3,22 +3,48 @@ package ex1;
 import ast.*;
 
 public class LineVisitor implements Visitor {
-    private AstNode result;
+    private AstNode result = null;
     private int lineNumber;
-    public LineVisitor(int lineNumber){
+    private String varName;
+    private boolean isFound = false;
+
+    public LineVisitor(String varName, int lineNumber) {
         this.lineNumber = lineNumber;
+        this.varName = varName;
     }
 
-    public AstNode getResult(){
+    public AstNode getResult() {
         return result;
     }
+
     @Override
     public void visit(Program program) {
-
+        for (var classdecl : program.classDecls()) {
+            classdecl.accept(this);
+            if (this.isFound) {
+                return;
+            }
+        }
     }
 
     @Override
     public void visit(ClassDecl classDecl) {
+        for(var field: classDecl.fields()){
+            field.accept(this);
+            if(this.isFound){
+                this.result = classDecl;
+                return;
+            }
+        }
+
+        for(var method: classDecl.methoddecls()){
+            method.accept(this);
+            if(this.isFound){
+                return;
+            }
+        }
+
+
 
     }
 
@@ -29,17 +55,35 @@ public class LineVisitor implements Visitor {
 
     @Override
     public void visit(MethodDecl methodDecl) {
+        for(var formalArg: methodDecl.formals()){
+            formalArg.accept(this);
+            if(this.isFound){
+                this.result = methodDecl;
+                return;
+            }
+        }
 
+        for(var decl: methodDecl.vardecls()){
+            decl.accept(this);
+            if(this.isFound){
+                this.result = methodDecl;
+                return;
+            }
+        }
     }
 
     @Override
     public void visit(FormalArg formalArg) {
-
+        if(formalArg.name().equals(this.varName) && formalArg.lineNumber == this.lineNumber){
+            this.isFound = true;
+        }
     }
 
     @Override
     public void visit(VarDecl varDecl) {
-
+        if(varDecl.name().equals(this.varName) && varDecl.lineNumber == this.lineNumber){
+            this.isFound = true;
+        }
     }
 
     @Override

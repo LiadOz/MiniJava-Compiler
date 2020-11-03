@@ -9,3 +9,4 @@ src/Parser.java
 README.org
 /MiniJava-Compiler.iml
 /.idea/
+/out/
