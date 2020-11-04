@@ -1,15 +1,25 @@
 package ex1;
 
 import ast.AstNode;
+import ast.ClassDecl;
 import ast.Program;
 
 public class RefactorMethod implements RefactorProgram {
     @Override
     public void refactor(Program orig, String originalName, String line, String newName) {
-        LineVisitor linev = new LineVisitor(Integer.getInteger(line)); // TODO: find the scope of the var
-        orig.accept(linev);
-        AstNode scope = linev.getResult();
-        RenameVarVisitor rename = new RenameVarVisitor(originalName, newName); // TODO: rename the var
-        scope.accept(rename);
+        // find the class containing the method
+        LineVisitor lVisitor = new LineVisitor(Integer.parseInt(line));
+        orig.accept(lVisitor);
+        AstNode realscope = lVisitor.getResult();
+        ClassDecl scope = new ClassDecl(); // this line is to be replaced with the real scope
+
+        // find all subclasses
+        ValidSubclass vs = new ValidSubclass(scope);
+        vs.initProg(orig);
+
+        // rename the method in the class and the subclasses
+        RenameMethodVisitor rename = new RenameMethodVisitor(originalName, newName, vs);
+        // rename the method in every variable by static type that fits the class and subclasses
+        // this includes by "this." inside the classes and by "(parent)a."
     }
 }
