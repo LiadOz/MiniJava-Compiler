@@ -4,6 +4,7 @@ import ast.*;
 
 public class LineVisitor implements Visitor {
     private AstNode result = null;
+    private ClassDecl scopeClass;
     private int lineNumber;
     private String varName;
     private boolean isFound = false;
@@ -17,11 +18,16 @@ public class LineVisitor implements Visitor {
         return result;
     }
 
+    public ClassDecl getScopeClass() {
+        return scopeClass;
+    }
+
     @Override
     public void visit(Program program) {
         for (var classdecl : program.classDecls()) {
             classdecl.accept(this);
             if (this.isFound) {
+                this.scopeClass = classdecl;
                 return;
             }
         }
