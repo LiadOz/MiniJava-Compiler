@@ -24,34 +24,39 @@ public class SymbolTableVisitor implements Visitor {
 
     @Override
     public void visit(Program program) {
-        for (ClassDecl classDecl : program.classDecls()){
+        for (ClassDecl classDecl : program.classDecls()) {
             classDecl.accept(this);
         }
+        program.setSymbolTable(root);
     }
 
     @Override
     public void visit(ClassDecl classDecl) {
         SymbolTable parent = root;
-        if (classDecl.superName() != null){
+        if (classDecl.superName() != null) {
             parent = classMap.get(classDecl.superName());
-            if (parent == null){
+            if (parent == null) {
                 throw new RuntimeException("invalid superclass");
             }
         }
         currTable = new SymbolTable(parent);
+        classDecl.setSymbolTable(currTable);
         classMap.put(classDecl.name(), currTable);
-        for (VarDecl varDecl : classDecl.fields()){
+
+        for (VarDecl varDecl : classDecl.fields()) {
             currSymbolType = SymbolKind.FIELD;
             varDecl.accept(this);
         }
-        for (MethodDecl methodDecl : classDecl.methoddecls()){
+        for (MethodDecl methodDecl : classDecl.methoddecls()) {
             currSymbolType = SymbolKind.VAR;
             methodDecl.accept(this);
         }
+
     }
 
     @Override
-    public void visit(MainClass mainClass) { }
+    public void visit(MainClass mainClass) {
+    }
 
     @Override
     public void visit(MethodDecl methodDecl) {
@@ -60,10 +65,13 @@ public class SymbolTableVisitor implements Visitor {
         currTable.addMethod(methodDecl.name(), method);
         SymbolTable prev = currTable;
         currTable = new SymbolTable(prev);
-        for (FormalArg varDecl : methodDecl.formals())
-            varDecl.accept(this);
+        methodDecl.setSymbolTable(currTable);
+        for (FormalArg formalArg : methodDecl.formals())
+            formalArg.accept(this);
         for (VarDecl varDecl : methodDecl.vardecls())
             varDecl.accept(this);
+        for (Statement statement : methodDecl.body())
+            statement.accept(this);
 
         currTable = prev;
     }
@@ -74,6 +82,7 @@ public class SymbolTableVisitor implements Visitor {
         Symbol s = new Symbol(
                 formalArg.name(), currSymbolType, varType, formalArg);
         currTable.addVar(formalArg.name(), s);
+        formalArg.setSymbolTable(currTable);
     }
 
     @Override
@@ -82,135 +91,169 @@ public class SymbolTableVisitor implements Visitor {
         Symbol s = new Symbol(
                 varDecl.name(), currSymbolType, varType, varDecl);
         currTable.addVar(varDecl.name(), s);
+        varDecl.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(BlockStatement blockStatement) {
-
+        blockStatement.setSymbolTable(currTable);
+        for (Statement statement : blockStatement.statements())
+            statement.accept(this);
     }
 
     @Override
     public void visit(IfStatement ifStatement) {
-
+        ifStatement.setSymbolTable(currTable);
+        ifStatement.cond().accept(this);
+        ifStatement.thencase().accept(this);
+        ifStatement.elsecase().accept(this);
     }
 
     @Override
     public void visit(WhileStatement whileStatement) {
-
+        whileStatement.setSymbolTable(currTable);
+        whileStatement.body().accept(this);
+        whileStatement.cond().accept(this);
     }
 
     @Override
     public void visit(SysoutStatement sysoutStatement) {
-
+        sysoutStatement.setSymbolTable(currTable);
+        sysoutStatement.arg().accept(this);
     }
 
     @Override
     public void visit(AssignStatement assignStatement) {
-
+        assignStatement.setSymbolTable(currTable);
+        assignStatement.rv().accept(this);
     }
 
     @Override
     public void visit(AssignArrayStatement assignArrayStatement) {
-
+        assignArrayStatement.setSymbolTable(currTable);
+        assignArrayStatement.rv().accept(this);
     }
 
     @Override
     public void visit(AndExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.e1().accept(this);
+        e.e2().accept(this);
     }
 
     @Override
     public void visit(LtExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.e1().accept(this);
+        e.e2().accept(this);
     }
 
     @Override
     public void visit(AddExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.e1().accept(this);
+        e.e2().accept(this);
     }
 
     @Override
     public void visit(SubtractExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.e1().accept(this);
+        e.e2().accept(this);
     }
 
     @Override
     public void visit(MultExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.e1().accept(this);
+        e.e2().accept(this);
     }
 
     @Override
     public void visit(ArrayAccessExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.arrayExpr().accept(this);
+        e.indexExpr().accept(this);
     }
 
     @Override
     public void visit(ArrayLengthExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.arrayExpr().accept(this);
     }
 
     @Override
     public void visit(MethodCallExpr e) {
-
+        e.setSymbolTable(currTable);
+        for (var a : e.actuals()) {
+            a.accept(this);
+        }
+        e.ownerExpr().accept(this);
     }
 
     @Override
     public void visit(IntegerLiteralExpr e) {
-
+        e.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(TrueExpr e) {
-
+        e.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(FalseExpr e) {
-
+        e.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(IdentifierExpr e) {
-
+        e.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(ThisExpr e) {
-
+        e.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(NewIntArrayExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.lengthExpr().accept(this);
     }
 
     @Override
     public void visit(NewObjectExpr e) {
-
+        e.setSymbolTable(currTable);
     }
 
     @Override
     public void visit(NotExpr e) {
-
+        e.setSymbolTable(currTable);
+        e.e().accept(this);
     }
 
     @Override
     public void visit(IntAstType t) {
+        t.setSymbolTable(currTable);
         varType = "int";
     }
 
     @Override
     public void visit(BoolAstType t) {
+        t.setSymbolTable(currTable);
         varType = "bool";
     }
 
     @Override
     public void visit(IntArrayAstType t) {
+        t.setSymbolTable(currTable);
         varType = "int[]";
     }
 
     @Override
     public void visit(RefType t) {
+        t.setSymbolTable(currTable);
         varType = t.id();
     }
 }

@@ -8,7 +8,7 @@ public class SymbolTable {
     private Map<String, Symbol> methodEntries;
     private SymbolTable parent = null;
 
-    public SymbolTable(){
+    public SymbolTable() {
         varEntries = new HashMap<String, Symbol>();
         methodEntries = new HashMap<String, Symbol>();
     }
