@@ -3,9 +3,9 @@ package ex1;
 import ast.AstNode;
 
 public class Symbol {
-    private String id;
+    private String id; // name of symbol
     private SymbolKind kind;
-    private String decl;
+    private String decl; // static type for variables
     private AstNode node;
 
     public Symbol(String id, SymbolKind kind, String decl, AstNode node) {

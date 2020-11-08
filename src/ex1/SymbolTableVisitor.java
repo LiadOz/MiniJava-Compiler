@@ -62,6 +62,7 @@ public class SymbolTableVisitor implements Visitor {
     public void visit(MethodDecl methodDecl) {
         Symbol method = new Symbol(
                 methodDecl.name(), SymbolKind.METHOD, "", methodDecl);
+        // TODO: figure out method decl
         currTable.addMethod(methodDecl.name(), method);
         SymbolTable prev = currTable;
         currTable = new SymbolTable(prev);
