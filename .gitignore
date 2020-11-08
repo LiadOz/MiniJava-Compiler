@@ -2,8 +2,11 @@
 build/
 mjavac.jar
 src/sym.java
-src/lexer.java
-src/parser.java
+src/Lexer.java
+src/Parser.java
 
 #
 README.org
+/MiniJava-Compiler.iml
+/.idea/
+/out/

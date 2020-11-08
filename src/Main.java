@@ -52,7 +52,6 @@ public class Main {
                     } else {
                         throw new IllegalArgumentException("unknown rename type " + type);
                     }
-
                     refactorer.refactor(prog, originalName, originalLine, newName);
                     AstXMLSerializer xmlSerializer = new AstXMLSerializer();
                     xmlSerializer.serialize(prog, outfilename);
