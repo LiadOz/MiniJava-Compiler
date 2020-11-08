@@ -56,4 +56,11 @@ public class SymbolTable {
         }
         return ret;
     }
+
+    public void printTable(){
+        for (var value : methodEntries.values())
+            System.out.println(value.getId() + " " + value.getKind() + " " + value.getDecl());
+        for (var value : varEntries.values())
+            System.out.println(value.getId() + " " + value.getKind() + " " + value.getDecl());
+    }
 }

@@ -14,4 +14,20 @@ public class Symbol {
         this.decl = decl;
         this.node = node;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public SymbolKind getKind() {
+        return kind;
+    }
+
+    public String getDecl() {
+        return decl;
+    }
+
+    public AstNode getNode() {
+        return node;
+    }
 }
