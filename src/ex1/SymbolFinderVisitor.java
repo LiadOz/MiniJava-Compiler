@@ -2,56 +2,41 @@ package ex1;
 
 import ast.*;
 
-public class LineVisitor implements Visitor {
-    private AstNode result = null;
-    private ClassDecl scopeClass;
+public class SymbolFinderVisitor implements Visitor {
+    private ex1.Symbol result = null;
     private int lineNumber;
-    private String varName;
+    private String symbolName;
     private boolean isFound = false;
 
-    public LineVisitor(String varName, int lineNumber) {
+    public SymbolFinderVisitor(String symbolName, int lineNumber) {
         this.lineNumber = lineNumber;
-        this.varName = varName;
+        this.symbolName = symbolName;
     }
 
-    public AstNode getResult() {
+    public ex1.Symbol getResult() {
         return result;
     }
 
-    public ClassDecl getScopeClass() {
-        return scopeClass;
-    }
 
     @Override
     public void visit(Program program) {
         for (var classdecl : program.classDecls()) {
             classdecl.accept(this);
-            if (this.isFound) {
-                this.scopeClass = classdecl;
-                return;
-            }
+            if (isFound) return;
         }
     }
 
     @Override
     public void visit(ClassDecl classDecl) {
-        for(var field: classDecl.fields()){
+        for (var field : classDecl.fields()) {
             field.accept(this);
-            if(this.isFound){
-                this.result = classDecl;
-                return;
-            }
+            if (isFound) return;
         }
 
-        for(var method: classDecl.methoddecls()){
+        for (var method : classDecl.methoddecls()) {
             method.accept(this);
-            if(this.isFound){
-                return;
-            }
+            if (isFound) return;
         }
-
-
-
     }
 
     @Override
@@ -61,34 +46,36 @@ public class LineVisitor implements Visitor {
 
     @Override
     public void visit(MethodDecl methodDecl) {
-        for(var formalArg: methodDecl.formals()){
+        if(methodDecl.name().equals(symbolName) && methodDecl.lineNumber == lineNumber){
+            isFound = true;
+            result = methodDecl.getSymbolTable().methodLookup(symbolName);
+            return;
+        }
+        
+        for (var formalArg : methodDecl.formals()) {
             formalArg.accept(this);
-            if(this.isFound){
-                this.result = methodDecl;
-                return;
-            }
+            if (isFound) return;
         }
 
-        for(var decl: methodDecl.vardecls()){
+        for (var decl : methodDecl.vardecls()) {
             decl.accept(this);
-            if(this.isFound){
-                this.result = methodDecl;
-                return;
-            }
+            if (isFound) return;
         }
     }
 
     @Override
     public void visit(FormalArg formalArg) {
-        if(formalArg.name().equals(this.varName) && formalArg.lineNumber == this.lineNumber){
-            this.isFound = true;
+        if (formalArg.name().equals(symbolName) && formalArg.lineNumber == lineNumber) {
+            result = formalArg.getSymbolTable().varLookup(formalArg.name());
+            isFound = true;
         }
     }
 
     @Override
     public void visit(VarDecl varDecl) {
-        if(varDecl.name().equals(this.varName) && varDecl.lineNumber == this.lineNumber){
-            this.isFound = true;
+        if (varDecl.name().equals(symbolName) && varDecl.lineNumber == lineNumber) {
+            result = varDecl.getSymbolTable().varLookup(varDecl.name());
+            isFound = true;
         }
     }
 
