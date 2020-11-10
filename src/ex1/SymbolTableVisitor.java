@@ -2,23 +2,20 @@ package ex1;
 
 import ast.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /*
-    This visitor inserts data to a SymbolTable root
+    This visitor inserts data to a SymbolTable root and ClassMapping
  */
 // TODO: add valid method decl symbol
 // TODO: figure out if varType and currSymbolType are valid ways to save data
 public class SymbolTableVisitor implements Visitor {
-    private SymbolTable root;
+    private final SymbolTable root;
+    private final ClassMapping classMapping;
     private String varType;
     private SymbolKind currSymbolType;
     private SymbolTable currTable;
-    private Map<String, SymbolTable> classMap;
 
-    public SymbolTableVisitor(SymbolTable root) {
-        classMap = new HashMap<String, SymbolTable>();
+    public SymbolTableVisitor(SymbolTable root, ClassMapping classMapping) {
+        this.classMapping = classMapping;
         this.root = root;
     }
 
@@ -34,14 +31,14 @@ public class SymbolTableVisitor implements Visitor {
     public void visit(ClassDecl classDecl) {
         SymbolTable parent = root;
         if (classDecl.superName() != null) {
-            parent = classMap.get(classDecl.superName());
+            parent = classMapping.get(classDecl.superName());
             if (parent == null) {
                 throw new RuntimeException("invalid superclass");
             }
         }
         currTable = new SymbolTable(parent);
         classDecl.setSymbolTable(currTable);
-        classMap.put(classDecl.name(), currTable);
+        classMapping.add(classDecl.name(), currTable);
 
         for (VarDecl varDecl : classDecl.fields()) {
             currSymbolType = SymbolKind.FIELD;
