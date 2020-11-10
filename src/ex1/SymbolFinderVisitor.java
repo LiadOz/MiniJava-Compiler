@@ -5,12 +5,12 @@ import ast.*;
 public class SymbolFinderVisitor implements Visitor {
     private ex1.Symbol result = null;
     private int lineNumber;
-    private String varName;
+    private String symbolName;
     private boolean isFound = false;
 
     public SymbolFinderVisitor(String varName, int lineNumber) {
         this.lineNumber = lineNumber;
-        this.varName = varName;
+        this.symbolName = varName;
     }
 
     public ex1.Symbol getResult() {
@@ -46,9 +46,9 @@ public class SymbolFinderVisitor implements Visitor {
 
     @Override
     public void visit(MethodDecl methodDecl) {
-        if(methodDecl.name().equals(varName) && methodDecl.lineNumber == lineNumber){
+        if(methodDecl.name().equals(symbolName) && methodDecl.lineNumber == lineNumber){
             isFound = true;
-            result = methodDecl.getSymbolTable().methodLookup(varName);
+            result = methodDecl.getSymbolTable().methodLookup(symbolName);
             return;
         }
         
@@ -65,7 +65,7 @@ public class SymbolFinderVisitor implements Visitor {
 
     @Override
     public void visit(FormalArg formalArg) {
-        if (formalArg.name().equals(varName) && formalArg.lineNumber == lineNumber) {
+        if (formalArg.name().equals(symbolName) && formalArg.lineNumber == lineNumber) {
             result = formalArg.getSymbolTable().varLookup(formalArg.name());
             isFound = true;
         }
@@ -73,7 +73,7 @@ public class SymbolFinderVisitor implements Visitor {
 
     @Override
     public void visit(VarDecl varDecl) {
-        if (varDecl.name().equals(varName) && varDecl.lineNumber == lineNumber) {
+        if (varDecl.name().equals(symbolName) && varDecl.lineNumber == lineNumber) {
             result = varDecl.getSymbolTable().varLookup(varDecl.name());
             isFound = true;
         }
