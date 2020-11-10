@@ -24,11 +24,37 @@ public class SymbolTable {
         varEntries.put(id, s);
     }
 
+    public Symbol removeVar(String id) {
+        if (!varEntries.containsKey(id)) {
+            throw new RuntimeException(id + " not in symbol table");
+        }
+        return varEntries.remove(id);
+    }
+
+    public void updateVarId(String id) {
+        Symbol s = removeVar(id);
+        s.setId(id);
+        addVar(id, s);
+    }
+
     public void addMethod(String id, Symbol s){
         if (methodEntries.containsKey(id)) {
             throw new RuntimeException(id + " already in symbol table");
         }
         methodEntries.put(id, s);
+    }
+
+    public Symbol removeMethod(String id) {
+        if (!methodEntries.containsKey(id)) {
+            throw new RuntimeException(id + " not in symbol table");
+        }
+        return methodEntries.remove(id);
+    }
+
+    public void updateMethodId(String id) {
+        Symbol s = removeMethod(id);
+        s.setId(id);
+        addMethod(id, s);
     }
 
     public Symbol varLookup(String id){

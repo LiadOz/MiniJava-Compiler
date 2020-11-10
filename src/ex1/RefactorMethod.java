@@ -21,7 +21,8 @@ public class RefactorMethod implements RefactorProgram {
         // RenameMethodVisitor rename = new RenameMethodVisitor(originalName, newName, vs);
         // // rename the method in every variable by static type that fits the class and subclasses
         // // this includes by "this." inside the classes and by "(parent)a."
-        SymbolTableVisitor a = new SymbolTableVisitor(new SymbolTable());
+        ClassMapping cm = new ClassMapping();
+        SymbolTableVisitor a = new SymbolTableVisitor(new SymbolTable(), cm);
         orig.accept(a);
     }
 }
