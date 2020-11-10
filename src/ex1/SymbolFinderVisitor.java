@@ -8,9 +8,9 @@ public class SymbolFinderVisitor implements Visitor {
     private String symbolName;
     private boolean isFound = false;
 
-    public SymbolFinderVisitor(String varName, int lineNumber) {
+    public SymbolFinderVisitor(String symbolName, int lineNumber) {
         this.lineNumber = lineNumber;
-        this.symbolName = varName;
+        this.symbolName = symbolName;
     }
 
     public ex1.Symbol getResult() {
