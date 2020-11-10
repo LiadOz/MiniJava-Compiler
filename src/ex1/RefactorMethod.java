@@ -1,7 +1,6 @@
 package ex1;
 
-import ast.AstNode;
-import ast.ClassDecl;
+
 import ast.Program;
 
 public class RefactorMethod implements RefactorProgram {
@@ -22,7 +21,7 @@ public class RefactorMethod implements RefactorProgram {
         // // rename the method in every variable by static type that fits the class and subclasses
         // // this includes by "this." inside the classes and by "(parent)a."
         ClassMapping classMap = new ClassMapping();
-        SymbolTableVisitor symbolTableBuilder = new SymbolTableVisitor(new SymbolTable(), cm);
+        SymbolTableVisitor symbolTableBuilder = new SymbolTableVisitor(new SymbolTable(), classMap);
         orig.accept(symbolTableBuilder);
     }
 }
