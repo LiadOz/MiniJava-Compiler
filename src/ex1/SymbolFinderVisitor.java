@@ -48,7 +48,7 @@ public class SymbolFinderVisitor implements Visitor {
     public void visit(MethodDecl methodDecl) {
         if(methodDecl.name().equals(symbolName) && methodDecl.lineNumber == lineNumber){
             isFound = true;
-            result = methodDecl.getSymbolTable().methodLookup(symbolName);
+            result = methodDecl.getSymbolTable().parentMethodLookup(symbolName);
             return;
         }
         
