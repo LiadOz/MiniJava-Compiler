@@ -7,21 +7,22 @@ public class RenameVarVisitor implements Visitor {
     private String newName;
     private Symbol symbol;
 
-    public RenameVarVisitor(String oldName, String newName, Symbol symbol){
+    public RenameVarVisitor(String oldName, String newName, Symbol symbol) {
         this.oldName = oldName;
         this.newName = newName;
         this.symbol = symbol;
     }
+
     @Override
     public void visit(Program program) {
-        for(var classDecl : program.classDecls()) classDecl.accept(this);
+        for (var classDecl : program.classDecls()) classDecl.accept(this);
         program.mainClass().accept(this);
     }
 
     @Override
     public void visit(ClassDecl classDecl) {
-        for(var field: classDecl.fields()) field.accept(this);
-        for(var method: classDecl.methoddecls()) method.accept(this);
+        for (var field : classDecl.fields()) field.accept(this);
+        for (var method : classDecl.methoddecls()) method.accept(this);
     }
 
     @Override
@@ -31,34 +32,30 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(MethodDecl methodDecl) {
-        for(var formal: methodDecl.formals()) formal.accept(this);
-        for(var varDecl: methodDecl.vardecls()) varDecl.accept(this);
+        for (var formal : methodDecl.formals()) formal.accept(this);
+        for (var varDecl : methodDecl.vardecls()) varDecl.accept(this);
+        for (var statement: methodDecl.body()) statement.accept(this);
         methodDecl.ret().accept(this);
     }
 
     @Override
     public void visit(FormalArg formalArg) {
-        if(formalArg.name().equals(oldName)){
-            var correspondingSymbol = formalArg.getSymbolTable().varLookup(oldName);
-            if(correspondingSymbol == symbol) {
-                formalArg.setName(newName);
-            }
+        if (formalArg.getSymbolTable().varLookup(formalArg.name()) == symbol) {
+            formalArg.setName(newName);
         }
     }
 
+
     @Override
     public void visit(VarDecl varDecl) {
-        if(varDecl.name().equals(oldName)){
-           var correspondingSymbol = varDecl.getSymbolTable().varLookup(oldName);
-           if(correspondingSymbol == symbol){
-               varDecl.setName(newName);
-           }
+        if (varDecl.getSymbolTable().varLookup(varDecl.name()) == symbol) {
+            varDecl.setName(newName);
         }
     }
 
     @Override
     public void visit(BlockStatement blockStatement) {
-        for(var statement: blockStatement.statements()) statement.accept(this);
+        for (var statement : blockStatement.statements()) statement.accept(this);
     }
 
     @Override
@@ -76,29 +73,22 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(SysoutStatement sysoutStatement) {
-            sysoutStatement.arg().accept(this);
+        sysoutStatement.arg().accept(this);
     }
 
     @Override
     public void visit(AssignStatement assignStatement) {
-        if(assignStatement.lv().equals(oldName)){
-            var correspondingSymbol = assignStatement.getSymbolTable().varLookup(oldName);
-            if(correspondingSymbol == symbol){
-                assignStatement.setLv(newName);
-            }
+        if (assignStatement.getSymbolTable().varLookup(assignStatement.lv()) == symbol) {
+            assignStatement.setLv(newName);
         }
         assignStatement.rv().accept(this);
     }
 
     @Override
     public void visit(AssignArrayStatement assignArrayStatement) {
-        if(assignArrayStatement.lv().equals(oldName)){
-            var correspondingSymbol = assignArrayStatement.getSymbolTable().varLookup(oldName);
-            if(correspondingSymbol == symbol){
-                assignArrayStatement.setLv(newName);
-            }
+        if (assignArrayStatement.getSymbolTable().varLookup(assignArrayStatement.lv()) == symbol) {
+            assignArrayStatement.setLv(newName);
         }
-
         assignArrayStatement.index().accept(this);
         assignArrayStatement.rv().accept(this);
     }
@@ -135,8 +125,8 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(ArrayAccessExpr e) {
-       e.indexExpr().accept(this);
-       e.arrayExpr().accept(this);
+        e.indexExpr().accept(this);
+        e.arrayExpr().accept(this);
     }
 
     @Override
@@ -146,7 +136,7 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(MethodCallExpr e) {
-        for(var actual : e.actuals()) actual.accept(this);
+        for (var actual : e.actuals()) actual.accept(this);
     }
 
     @Override
@@ -166,17 +156,13 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(IdentifierExpr e) {
-        if(e.id().equals(oldName)){
-            var correspondingSymbol = e.getSymbolTable().varLookup(oldName);
-            if(correspondingSymbol == symbol){
-                e.setId(newName);
-            }
+        if (e.getSymbolTable().varLookup(e.id()) == symbol) {
+            e.setId(newName);
         }
     }
 
     @Override
     public void visit(ThisExpr e) {
-
     }
 
     @Override
@@ -211,11 +197,8 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(RefType t) {
-        if(t.id().equals(oldName)){
-            var correspondingSymbol = t.getSymbolTable().varLookup(oldName);
-            if(correspondingSymbol == symbol){
-                t.setId(newName);
-            }
+        if (t.getSymbolTable().varLookup(t.id()) == symbol) {
+            t.setId(newName);
         }
     }
 }

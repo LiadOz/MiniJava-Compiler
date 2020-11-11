@@ -179,6 +179,7 @@ public class SymbolTableVisitor implements Visitor {
     public void visit(ArrayLengthExpr e) {
         e.setSymbolTable(currTable);
         e.arrayExpr().accept(this);
+
     }
 
     @Override
