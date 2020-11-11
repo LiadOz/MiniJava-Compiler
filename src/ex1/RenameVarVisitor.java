@@ -33,6 +33,7 @@ public class RenameVarVisitor implements Visitor {
     public void visit(MethodDecl methodDecl) {
         for(var formal: methodDecl.formals()) formal.accept(this);
         for(var varDecl: methodDecl.vardecls()) varDecl.accept(this);
+        methodDecl.ret().accept(this);
     }
 
     @Override
