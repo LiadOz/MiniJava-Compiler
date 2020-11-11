@@ -83,6 +83,18 @@ public class SymbolTable {
         return ret;
     }
 
+    // finds the upmost method in class tree
+    public Symbol parentMethodLookup(String id) {
+        Symbol ret = methodLookup(id);
+        try {
+            ret = parent.parentMethodLookup(id);
+        }
+        catch (RuntimeException e) {
+        }
+        return ret;
+
+    }
+
     public void printTable(){
         for (var value : methodEntries.values())
             System.out.println(value.getId() + " " + value.getKind() + " " + value.getDecl());
