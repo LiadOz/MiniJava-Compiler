@@ -70,6 +70,7 @@ public class SymbolTableVisitor implements Visitor {
             varDecl.accept(this);
         for (Statement statement : methodDecl.body())
             statement.accept(this);
+        methodDecl.ret().accept(this);
 
         currTable = prev;
     }
