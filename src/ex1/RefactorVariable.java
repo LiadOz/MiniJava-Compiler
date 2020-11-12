@@ -9,10 +9,10 @@ public class RefactorVariable implements RefactorProgram {
         ClassMapping classMap = new ClassMapping();
         SymbolTableVisitor symbolTableBuilder = new SymbolTableVisitor(new SymbolTable(), classMap);
         orig.accept(symbolTableBuilder);
-        ex1.SymbolFinderVisitor finder = new ex1.SymbolFinderVisitor(originalName, Integer.parseInt(line)); // TODO: find the scope of the var
+        ex1.SymbolFinderVisitor finder = new ex1.SymbolFinderVisitor(originalName, Integer.parseInt(line));
         orig.accept(finder);
         ex1.Symbol targetSymbol = finder.getResult();
-        RenameVarVisitor rename = new RenameVarVisitor(originalName, newName, targetSymbol); // TODO: rename the var
+        RenameVarVisitor rename = new RenameVarVisitor(newName, targetSymbol);
         orig.accept(rename);
     }
 }

@@ -3,12 +3,10 @@ package ex1;
 import ast.*;
 
 public class RenameVarVisitor implements Visitor {
-    private String oldName;
-    private String newName;
-    private Symbol symbol;
+    private final String newName;
+    private final Symbol symbol;
 
-    public RenameVarVisitor(String oldName, String newName, Symbol symbol) {
-        this.oldName = oldName;
+    public RenameVarVisitor(String newName, Symbol symbol) {
         this.newName = newName;
         this.symbol = symbol;
     }
@@ -34,7 +32,7 @@ public class RenameVarVisitor implements Visitor {
     public void visit(MethodDecl methodDecl) {
         for (var formal : methodDecl.formals()) formal.accept(this);
         for (var varDecl : methodDecl.vardecls()) varDecl.accept(this);
-        for (var statement: methodDecl.body()) statement.accept(this);
+        for (var statement : methodDecl.body()) statement.accept(this);
         methodDecl.ret().accept(this);
     }
 
