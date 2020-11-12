@@ -48,7 +48,6 @@ public class SymbolTableVisitor implements Visitor {
             currSymbolType = SymbolKind.VAR;
             methodDecl.accept(this);
         }
-
     }
 
     @Override
@@ -131,6 +130,7 @@ public class SymbolTableVisitor implements Visitor {
     public void visit(AssignArrayStatement assignArrayStatement) {
         assignArrayStatement.setSymbolTable(currTable);
         assignArrayStatement.rv().accept(this);
+        assignArrayStatement.index().accept(this);
     }
 
     @Override
