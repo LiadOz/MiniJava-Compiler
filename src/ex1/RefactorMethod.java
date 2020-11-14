@@ -1,7 +1,6 @@
 package ex1;
 
-import ast.AstNode;
-import ast.ClassDecl;
+
 import ast.Program;
 
 public class RefactorMethod implements RefactorProgram {
