@@ -135,6 +135,7 @@ public class RenameVarVisitor implements Visitor {
     @Override
     public void visit(MethodCallExpr e) {
         for (var actual : e.actuals()) actual.accept(this);
+        e.ownerExpr().accept(this);
     }
 
     @Override
@@ -165,7 +166,7 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(NewIntArrayExpr e) {
-
+        e.lengthExpr().accept(this);
     }
 
     @Override
@@ -195,8 +196,5 @@ public class RenameVarVisitor implements Visitor {
 
     @Override
     public void visit(RefType t) {
-        if (t.getSymbolTable().varLookup(t.id()) == symbol) {
-            t.setId(newName);
-        }
     }
 }
