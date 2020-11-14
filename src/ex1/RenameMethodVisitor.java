@@ -80,6 +80,7 @@ public class RenameMethodVisitor implements Visitor {
 
     @Override
     public void visit(AssignArrayStatement assignArrayStatement) {
+        assignArrayStatement.index().accept(this);
         assignArrayStatement.rv().accept(this);
     }
 
@@ -126,6 +127,10 @@ public class RenameMethodVisitor implements Visitor {
 
     @Override
     public void visit(MethodCallExpr e) {
+        for (var exp : e.actuals())
+            exp.accept(this);
+
+        // rename the called method
         StaticClassVisitor classFinder = new StaticClassVisitor();
         e.ownerExpr().accept(classFinder);
         String ownerClass = classFinder.getResult();
