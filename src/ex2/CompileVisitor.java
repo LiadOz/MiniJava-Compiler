@@ -6,6 +6,7 @@ import ex1.ClassMapping;
 public class CompileVisitor implements Visitor {
     private final StringBuilder builder = new StringBuilder();
     private final ClassMapping classMapping;
+    private int lastRegisterNumber = 0;
 
     public CompileVisitor(ClassMapping classMapping) {
         this.classMapping = classMapping;
