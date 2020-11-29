@@ -1,6 +1,8 @@
 import ast.*;
 import ex1.RefactorFactory;
 import ex1.RefactorProgram;
+import ex2.CompileVisitor;
+import ex2.ProgramCompiler;
 
 import java.io.*;
 
@@ -38,7 +40,8 @@ public class Main {
                     throw new UnsupportedOperationException("TODO - Ex. 3");
 
                 } else if (action.equals("compile")) {
-                    throw new UnsupportedOperationException("TODO - Ex. 2");
+                    ProgramCompiler compile = new ProgramCompiler();
+                    outFile.write(compile.compile(prog));
 
                 } else if (action.equals("rename")) {
                     var type = args[2];
