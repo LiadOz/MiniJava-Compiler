@@ -90,11 +90,11 @@ public class CompileVisitor implements Visitor {
         Symbol funcSymbol = st.methodLookup(e.methodId());
 
         e.ownerExpr().accept(this); // this should generate the owner ptr
-        int ownerPtr = lastRegisterNumber;
+        int ownerPtr = lastRegisterNumber - 1;
         List<Integer> actualsRegisters = new LinkedList<>();
         for (var actual : e.actuals()) { // generate code for actuals and save their registers
             actual.accept(this);
-            actualsRegisters.add(lastRegisterNumber);
+            actualsRegisters.add(lastRegisterNumber - 1);
         }
 
         int casted = lastRegisterNumber++; // bitcast vtable pointer
