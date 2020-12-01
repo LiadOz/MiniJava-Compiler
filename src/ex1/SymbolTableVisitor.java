@@ -1,6 +1,7 @@
 package ex1;
 
 import ast.*;
+import ex2.TypeDecider;
 
 /*
     This visitor inserts data to a SymbolTable root and ClassMapping
@@ -56,8 +57,16 @@ public class SymbolTableVisitor implements Visitor {
 
     @Override
     public void visit(MethodDecl methodDecl) {
+        StringBuilder decl = new StringBuilder();
+        for (FormalArg formalArg : methodDecl.formals()) {
+            if (!decl.toString().equals(""))
+                decl.append(Symbol.DECL_SEP);
+            decl.append(TypeDecider.javaType(formalArg.type()));
+        }
+        decl.append(Symbol.DECL_MAJOR_SEP).append(TypeDecider.javaType(methodDecl.returnType()));
+
         Symbol method = new Symbol(
-                methodDecl.name(), SymbolKind.METHOD, "", methodDecl);
+                methodDecl.name(), SymbolKind.METHOD, decl.toString(), methodDecl);
         // TODO: figure out method decl
         currTable.addMethod(methodDecl.name(), method);
         SymbolTable prev = currTable;

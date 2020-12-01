@@ -3,6 +3,8 @@ package ex1;
 import ast.AstNode;
 
 public class Symbol {
+    public static final String DECL_SEP = ",";
+    public static final String DECL_MAJOR_SEP= "->";
     private String id; // name of symbol
     private SymbolKind kind;
     private String decl; // static type for variables
