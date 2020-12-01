@@ -214,31 +214,31 @@ public class CompileVisitor implements Visitor {
         var lengthResultRegister = lastRegisterNumber - 1;
         var compareToZeroResultRegister = lastRegisterNumber++;
 
-        builder.append("%_" + compareToZeroResultRegister + " = icmp slt i32 %_" + lengthResultRegister + " , 0" + "\n");
+        addLine(String.format("%%_%s = icmp slt i32 %%_%s , 0", compareToZeroResultRegister, lengthResultRegister));
 
         var label1 = lastLabelNumber++;
         var label2 = lastLabelNumber++;
 
 
-        builder.append("br i1 %_" + compareToZeroResultRegister +", label %arr_alloc" + label1 + ", label %arr_alloc" + label2 + "\n");
-        builder.append("arr_alloc" + label1 + ":\n");
-        builder.append("call void @throw_oob()\n\n");
-        builder.append("br label %alloc_arr" + label2 + "\n");
-        builder.append("alloc_arr" + label2 + ":\n" );
+        addLine(String.format("br i1 %%_%s, label %%arr_alloc%s, label %%arr_alloc%s", compareToZeroResultRegister, label1, label2));
+        addLine("arr_alloc" + label1 + ":");
+        addLine("call void @throw_oob()\n");
+        addLine("br label %alloc_arr" + label2);
+        addLine("alloc_arr" + label2 + ":" );
 
         var lengthPlusOneResultRegister = lastRegisterNumber++;
 
-        builder.append("%_" + lengthPlusOneResultRegister +" = add i32 %_" + lengthResultRegister + ", 1\n");
+        addLine(String.format("%%_%s = addi32 %%_%s, 1", lengthPlusOneResultRegister, lengthResultRegister));
 
         var allocationRegister = lastRegisterNumber++;
 
-        builder.append(String.format("%%_%s = call i8* @calloc(i32 4, i32 %%_%s)", allocationRegister, lengthPlusOneResultRegister) + "\n");
+        addLine(String.format("%%_%s = call i8* @calloc(i32 4, i32 %%_%s)", allocationRegister, lengthPlusOneResultRegister));
 
         var castRegister = lastRegisterNumber++;
 
-        builder.append(String.format("%%_%s = bitcast i8* %%_%s to i32*", castRegister, allocationRegister) + "\n");
+        addLine(String.format("%%_%s = bitcast i8* %%_%s to i32*", castRegister, allocationRegister));
 
-        builder.append(String.format("store i32 %%_%s, i32* %%_%s", lengthResultRegister, allocationRegister) + "\n");
+        addLine(String.format("store i32 %%_%s, i32* %%_%s", lengthResultRegister, allocationRegister));
 
     }
 
