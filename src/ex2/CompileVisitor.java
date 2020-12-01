@@ -7,6 +7,7 @@ public class CompileVisitor implements Visitor {
     private final StringBuilder builder = new StringBuilder();
     private final ClassMapping classMapping;
     private int lastRegisterNumber = 0;
+    private int lastLabelNumber = 0;
 
     public CompileVisitor(ClassMapping classMapping) {
         this.classMapping = classMapping;
@@ -93,6 +94,35 @@ public class CompileVisitor implements Visitor {
 
     @Override
     public void visit(NewIntArrayExpr e) {
+        e.lengthExpr().accept(this);
+        var lengthResultRegister = lastRegisterNumber - 1;
+        var compareToZeroResultRegister = lastRegisterNumber++;
+
+        builder.append("%_" + compareToZeroResultRegister + " = icmp slt i32 %_" + lengthResultRegister + " , 0" + "\n");
+
+        var label1 = lastLabelNumber++;
+        var label2 = lastLabelNumber++;
+
+
+        builder.append("br i1 %_" + compareToZeroResultRegister +", label %arr_alloc" + label1 + ", label %arr_alloc" + label2 + "\n");
+        builder.append("arr_alloc" + label1 + ":\n");
+        builder.append("call void @throw_oob()\n\n");
+        builder.append("br label %alloc_arr" + label2 + "\n");
+        builder.append("alloc_arr" + label2 + ":\n" );
+
+        var lengthPlusOneResultRegister = lastRegisterNumber++;
+
+        builder.append("%_" + lengthPlusOneResultRegister +" = add i32 %_" + lengthResultRegister + ", 1\n");
+
+        var allocationRegister = lastRegisterNumber++;
+
+        builder.append(String.format("%%_%s = call i8* @calloc(i32 4, i32 %%_%s)", allocationRegister, lengthPlusOneResultRegister) + "\n");
+
+        var castRegister = lastRegisterNumber++;
+
+        builder.append(String.format("%%_%s = bitcast i8* %%_%s to i32*", castRegister, allocationRegister) + "\n");
+
+        builder.append(String.format("store i32 %%_%s, i32* %%_%s", lengthResultRegister, allocationRegister) + "\n");
 
     }
 
