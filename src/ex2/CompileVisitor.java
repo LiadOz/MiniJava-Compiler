@@ -244,6 +244,45 @@ public class CompileVisitor implements Visitor {
 
     @Override
     public void visit(ArrayAccessExpr e) {
+        e.arrayExpr().accept(this);
+        var arrayRegister = lastRegisterNumber - 1;
+        e.indexExpr().accept(this);
+        var indexRegister = lastRegisterNumber - 1;
+
+        var indexComparisonToZeroRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = icmp slt i32 %%_%s, 0", indexComparisonToZeroRegister, indexRegister));
+
+        var label1 = lastLabelNumber++;
+        var label2 = lastLabelNumber++;
+        addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
+        addLine(String.format("arr_check%s:", label1));
+        addLine("call void @throw_oob()\n");
+        addLine("br label %arr_check" + label2);
+        addLine(String.format("arr_check%s:", label2));
+
+        var lengthPointerRegister = lastRegisterNumber++;
+        var lengthRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthPointerRegister, arrayRegister));
+        addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthPointerRegister));
+
+        var indexComparisonToLengthRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = icmp sle i32 %%_%s, %%_%s", indexComparisonToLengthRegister, lengthRegister, indexRegister));
+
+        var label3 = lastLabelNumber++;
+        var label4 = lastLabelNumber++;
+
+        addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
+        addLine(String.format("arr_check%s:", label3));
+        addLine("call void @throw_oob()");
+        addLine(String.format("br label arr_check%s", label4));
+        addLine(String.format("arr_check%s",label4));
+        var indexPlusOneRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
+
+        var elementPointerRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 %%_%s", elementPointerRegister, arrayRegister, indexPlusOneRegister));
+        var elementValueRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = load i32, i32* %%_%s", elementValueRegister, elementPointerRegister));
     }
 
     @Override
