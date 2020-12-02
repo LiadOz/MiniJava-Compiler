@@ -50,6 +50,10 @@ public class CompileVisitor implements Visitor {
         builder.append("\t").append(line).append("\n");
     }
 
+    private void addLabel(String label){
+        builder.append(label).append("\n");
+    }
+
     @Override
     public void visit(ClassDecl classDecl) {
         for (var methodDecl : classDecl.methoddecls()) {
@@ -209,10 +213,10 @@ public class CompileVisitor implements Visitor {
         var label1 = lastLabelNumber++;
         var label2 = lastLabelNumber++;
         addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
-        addLine(String.format("arr_check%s:", label1));
+        addLabel(String.format("arr_check%s:", label1));
         addLine("call void @throw_oob()\n");
         addLine("br label %arr_check" + label2);
-        addLine(String.format("arr_check%s:", label2));
+        addLabel(String.format("arr_check%s:", label2));
 
         var lengthPointerRegister = lastRegisterNumber++;
         var lengthRegister = lastRegisterNumber++;
@@ -226,10 +230,10 @@ public class CompileVisitor implements Visitor {
         var label4 = lastLabelNumber++;
 
         addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
-        addLine(String.format("arr_check%s:", label3));
+        addLabel(String.format("arr_check%s:", label3));
         addLine("call void @throw_oob()");
         addLine(String.format("br label arr_check%s", label4));
-        addLine(String.format("arr_check%s:",label4));
+        addLabel(String.format("arr_check%s:",label4));
         var indexPlusOneRegister = lastRegisterNumber++;
         addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
 
@@ -255,10 +259,10 @@ public class CompileVisitor implements Visitor {
         var label1 = lastLabelNumber++;
         var label2 = lastLabelNumber++;
         addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
-        addLine(String.format("arr_check%s:", label1));
+        addLabel(String.format("arr_check%s:", label1));
         addLine("call void @throw_oob()\n");
         addLine("br label %arr_check" + label2);
-        addLine(String.format("arr_check%s:", label2));
+        addLabel(String.format("arr_check%s:", label2));
 
         var lengthPointerRegister = lastRegisterNumber++;
         var lengthRegister = lastRegisterNumber++;
@@ -272,10 +276,10 @@ public class CompileVisitor implements Visitor {
         var label4 = lastLabelNumber++;
 
         addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
-        addLine(String.format("arr_check%s:", label3));
+        addLabel(String.format("arr_check%s:", label3));
         addLine("call void @throw_oob()");
         addLine(String.format("br label arr_check%s", label4));
-        addLine(String.format("arr_check%s:",label4));
+        addLabel(String.format("arr_check%s:",label4));
         var indexPlusOneRegister = lastRegisterNumber++;
         addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
 
@@ -308,10 +312,10 @@ public class CompileVisitor implements Visitor {
 
 
         addLine(String.format("br i1 %%_%s, label %%arr_alloc%s, label %%arr_alloc%s", compareToZeroResultRegister, label1, label2));
-        addLine("arr_alloc" + label1 + ":");
+        addLabel(String.format("arr_alloc%s:",label1));
         addLine("call void @throw_oob()\n");
         addLine("br label %alloc_arr" + label2);
-        addLine("alloc_arr" + label2 + ":" );
+        addLabel(String.format("arr_alloc%s:",label2));
 
         var lengthPlusOneResultRegister = lastRegisterNumber++;
 
