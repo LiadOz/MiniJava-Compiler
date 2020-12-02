@@ -248,7 +248,12 @@ public class CompileVisitor implements Visitor {
 
     @Override
     public void visit(ArrayLengthExpr e) {
-
+        e.arrayExpr().accept(this);
+        var arrayRegister = lastRegisterNumber - 1;
+        var lengthElementPointerRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthElementPointerRegister, arrayRegister));
+        var lengthRegister = lastRegisterNumber++;
+        addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthElementPointerRegister));
     }
 
     @Override
