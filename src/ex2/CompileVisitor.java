@@ -229,7 +229,7 @@ public class CompileVisitor implements Visitor {
         addLine(String.format("arr_check%s:", label3));
         addLine("call void @throw_oob()");
         addLine(String.format("br label arr_check%s", label4));
-        addLine(String.format("arr_check%s",label4));
+        addLine(String.format("arr_check%s:",label4));
         var indexPlusOneRegister = lastRegisterNumber++;
         addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
 
@@ -275,7 +275,7 @@ public class CompileVisitor implements Visitor {
         addLine(String.format("arr_check%s:", label3));
         addLine("call void @throw_oob()");
         addLine(String.format("br label arr_check%s", label4));
-        addLine(String.format("arr_check%s",label4));
+        addLine(String.format("arr_check%s:",label4));
         var indexPlusOneRegister = lastRegisterNumber++;
         addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
 
