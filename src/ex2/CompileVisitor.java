@@ -26,6 +26,27 @@ public class CompileVisitor implements Visitor {
         return builder.toString();
     }
 
+    private void insertHelperFunctions(){
+        builder.append("declare i8* @calloc(i32, i32)\n" +
+                "declare i32 @printf(i8*, ...)\n" +
+                "declare void @exit(i32)\n" +
+                "\n" +
+                "@_cint = constant [4 x i8] c\"%d\\0a\\00\"\n" +
+                "@_cOOB = constant [15 x i8] c\"Out of bounds\\0a\\00\"\n" +
+                "define void @print_int(i32 %i) {\n" +
+                "    %_str = bitcast [4 x i8]* @_cint to i8*\n" +
+                "    call i32 (i8*, ...) @printf(i8* %_str, i32 %i)\n" +
+                "    ret void\n" +
+                "}\n" +
+                "\n" +
+                "define void @throw_oob() {\n" +
+                "    %_str = bitcast [15 x i8]* @_cOOB to i8*\n" +
+                "    call i32 (i8*, ...) @printf(i8* %_str)\n" +
+                "    call void @exit(i32 1)\n" +
+                "    ret void\n" +
+                "}\n\n");
+    }
+
     @Override
     public void visit(Program program) {
         CompileClassesVisitor ccv = new CompileClassesVisitor();
@@ -33,6 +54,7 @@ public class CompileVisitor implements Visitor {
         builder.append(ccv.getString());
         symbolMapping = ccv.getMapping();
         pointerMap = ccv.getPointerMap();
+        insertHelperFunctions();
 
         program.mainClass().accept(this);
         for (var classDecl : program.classDecls())
