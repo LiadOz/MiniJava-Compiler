@@ -73,6 +73,8 @@ public class CompileVisitor implements Visitor {
             varDecl.accept(this);
         for (var statement : methodDecl.body())
             statement.accept(this);
+        methodDecl.ret().accept(this);
+        addLine(String.format("ret i32 %%_%d", lastRegisterNumber - 1));
         builder.append("}\n\n");
     }
 
@@ -168,8 +170,10 @@ public class CompileVisitor implements Visitor {
 
     @Override
     public void visit(FormalArg formalArg) {
-        String s = String.format("%%%s = alloca %s", formalArg.name(), TypeDecider.llvmType(formalArg.type()));
+        String type = TypeDecider.llvmType(formalArg.type());
+        String s = String.format("%%%s = alloca %s", formalArg.name(), type);
         addLine(s);
+        addLine(String.format("store %s %%.%s, %s* %%%s", type, formalArg.name(), type, formalArg.name()));
     }
 
     @Override
