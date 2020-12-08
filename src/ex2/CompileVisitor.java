@@ -285,19 +285,10 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(AssignStatement assignStatement) {
-		Symbol var = assignStatement.getSymbolTable().varLookup(assignStatement.lv());
-		String type = TypeDecider.llvmType(var.getDecl()), rv;
-		SymbolKind kind = var.getKind();
-		String id = assignStatement.lv();
+		String type = TypeDecider.llvmType(assignStatement.getSymbolTable().varLookup(assignStatement.lv()).getDecl()), rv;
 		assignStatement.rv().accept(this);
 		rv = "%_" + (lastRegisterNumber - 1);
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
-			id = "_" + (lastRegisterNumber - 1);
-		}
-		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + id);
+		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + assignStatement.lv());
 	}
 
 	public void getAndOperands(LinkedList<Expr> operands, AndExpr e) {
@@ -394,17 +385,8 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(IdentifierExpr e) {
-		Symbol var = e.getSymbolTable().varLookup(e.id());
-		String type = TypeDecider.llvmType(var.getDecl());
-		SymbolKind kind = var.getKind();
-		String id = e.id();
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
-			id = "_" + (lastRegisterNumber - 1);
-		}
-		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + id);
+		String type = TypeDecider.llvmType(e.getSymbolTable().varLookup(e.id()).getDecl());
+		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + e.id());
 	}
 
 	@Override
