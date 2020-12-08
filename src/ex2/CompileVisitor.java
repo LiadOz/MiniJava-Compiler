@@ -220,210 +220,193 @@ public class CompileVisitor implements Visitor {
 	}
 
 	// IF and JUMPS
-	@Override
-	public void visit(BlockStatement blockStatement) {
-		for (var s : blockStatement.statements()) {
-			builder.append("\n");
-			s.accept(this);
+		@Override
+		public void visit(BlockStatement blockStatement) {
+			for (var s : blockStatement.statements()) {
+				builder.append("\n");
+				s.accept(this);
+			}
 		}
-	}
 
-	@Override
-	public void visit(IfStatement ifStatement) {
-		ifStatement.cond().accept(this);
-		addLine("br i1 %_" + (lastRegisterNumber - 1) + ", " + "label %label" + lastLabelNumber + ", label %label"
-				+ (lastLabelNumber + 1));
-		builder.append("label" + lastLabelNumber++ + ":\n");
-		ifStatement.thencase().accept(this);
-		addLine("br label %label" + (lastLabelNumber + 1) + "\n");
-		builder.append("label" + lastLabelNumber++ + ":\n");
-		ifStatement.elsecase().accept(this);
-		addLine("br label %label" + lastLabelNumber + "\n");
-		builder.append("label" + lastLabelNumber++ + ":\n");
-	}
-
-	@Override
-	public void visit(WhileStatement whileStatement) {
-		addLine("br label %loop" + lastLabelNumber++);
-		addLine("loop" + (lastLabelNumber - 1) + ":"); // loop cond
-		whileStatement.cond().accept(this);
-		addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %loop" + lastLabelNumber++ + ", label %loop"
-				+ lastLabelNumber++);
-		addLine("loop" + (lastLabelNumber - 2) + ":"); // loop body
-		whileStatement.body().accept(this);
-		addLine("br label %loop" + (lastLabelNumber - 3));
-		addLine("loop" + (lastLabelNumber - 1) + ":"); // out of loop
-	}
-
-	// ARRAYS
-	@Override
-	public void visit(AssignArrayStatement assignArrayStatement) {
-
-	}
-
-	@Override
-	public void visit(ArrayAccessExpr e) {
-	}
-
-	@Override
-	public void visit(ArrayLengthExpr e) {
-
-	}
-
-	@Override
-	public void visit(NewIntArrayExpr e) {
-
-	}
-
-	@Override
-	public void visit(SysoutStatement sysoutStatement) {
-		String arg;
-		sysoutStatement.arg().accept(this);
-		arg = "%_" + (lastRegisterNumber - 1);
-		addLine("call void (i32) @print_int(i32 " + arg + ")");
-	}
-
-	@Override
-	public void visit(AssignStatement assignStatement) {
-		Symbol var = assignStatement.getSymbolTable().varLookup(assignStatement.lv());
-		String type = TypeDecider.llvmType(var.getDecl()), rv;
-		SymbolKind kind = var.getKind();
-		String id = assignStatement.lv();
-		assignStatement.rv().accept(this);
-		rv = "%_" + (lastRegisterNumber - 1);
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
-			id = "_" + (lastRegisterNumber - 1);
+		@Override
+		public void visit(IfStatement ifStatement) {
+			ifStatement.cond().accept(this);
+			addLine("br i1 %_" + (lastRegisterNumber - 1) + ", " + "label %label" + lastLabelNumber + ", label %label"
+					+ (lastLabelNumber + 1));
+			builder.append("label" + lastLabelNumber++ + ":\n");
+			ifStatement.thencase().accept(this);
+			addLine("br label %label" + (lastLabelNumber + 1) + "\n");
+			builder.append("label" + lastLabelNumber++ + ":\n");
+			ifStatement.elsecase().accept(this);
+			addLine("br label %label" + lastLabelNumber + "\n");
+			builder.append("label" + lastLabelNumber++ + ":\n");
 		}
-		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + id);
-	}
 
-	public void getAndOperands(LinkedList<Expr> operands, AndExpr e) {
-		if (!(e.e1() instanceof AndExpr)) {
-			operands.add(e.e1());
-		} else {
-			getAndOperands(operands, (AndExpr) e.e1());
+		@Override
+		public void visit(WhileStatement whileStatement) {
+			addLine("br label %loop" + lastLabelNumber++);
+			addLine("loop" + (lastLabelNumber - 1) + ":"); // loop cond
+			whileStatement.cond().accept(this);
+			addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %loop" + lastLabelNumber++ + ", label %loop"
+					+ lastLabelNumber++);
+			addLine("loop" + (lastLabelNumber - 2) + ":"); // loop body
+			whileStatement.body().accept(this);
+			addLine("br label %loop" + (lastLabelNumber - 3));
+			addLine("loop" + (lastLabelNumber - 1) + ":"); // out of loop
 		}
-		if (!(e.e2() instanceof AndExpr)) {
-			operands.add(e.e2());
-		} else {
-			getAndOperands(operands, (AndExpr) e.e2());
-		}
-	}
 
-	// Exp and trees
-	@Override
-	public void visit(AndExpr e) {
-		LinkedList<Expr> operands = new LinkedList<Expr>();
-		getAndOperands(operands, e);
-		operands.get(0).accept(this);
-		addLine("br label %andcond" + lastLabelNumber);
-		for (int i = 1; i < operands.size(); i++) {
-			builder.append("andcond" + lastLabelNumber++ + ":\n");
-			addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %andcond" + lastLabelNumber++ + ", label %andcond"
-					+ lastLabelNumber);
-			builder.append("andcond" + (lastLabelNumber - 1) + ":\n");
-			operands.get(i).accept(this);
+		// ARRAYS
+		@Override
+		public void visit(AssignArrayStatement assignArrayStatement) {
+
+		}
+
+		@Override
+		public void visit(ArrayAccessExpr e) {
+		}
+
+		@Override
+		public void visit(ArrayLengthExpr e) {
+
+		}
+
+		@Override
+		public void visit(NewIntArrayExpr e) {
+
+		}
+
+		@Override
+		public void visit(SysoutStatement sysoutStatement) {
+			String arg;
+			sysoutStatement.arg().accept(this);
+			arg = "%_" + (lastRegisterNumber - 1);
+			addLine("call void (i32) @print_int(i32 " + arg + ")");
+		}
+
+		@Override
+		public void visit(AssignStatement assignStatement) {
+			String type = TypeDecider.llvmType(assignStatement.getSymbolTable().varLookup(assignStatement.lv()).getDecl()),
+					rv;
+			assignStatement.rv().accept(this);
+			rv = "%_" + (lastRegisterNumber - 1);
+			addLine("store " + type + " " + rv + ", " + type + "* " + "%" + assignStatement.lv());
+		}
+
+		public void getAndOperands(LinkedList<Expr> operands, AndExpr e) {
+			if (!(e.e1() instanceof AndExpr)) {
+				operands.add(e.e1());
+			} else {
+				getAndOperands(operands, (AndExpr) e.e1());
+			}
+			if (!(e.e2() instanceof AndExpr)) {
+				operands.add(e.e2());
+			} else {
+				getAndOperands(operands, (AndExpr) e.e2());
+			}
+		}
+
+		// Exp and trees
+		@Override
+		public void visit(AndExpr e) {
+			LinkedList<Expr> operands = new LinkedList<Expr>();
+			getAndOperands(operands, e);
+			operands.get(0).accept(this);
 			addLine("br label %andcond" + lastLabelNumber);
-			builder.append("andcond" + lastLabelNumber++ + ":\n");
-			addLine("%_" + lastRegisterNumber++ + " = phi i1 [0, %andcond" + (lastLabelNumber - 3) + "], [%_"
-					+ (lastRegisterNumber - 2) + ", %andcond" + (lastLabelNumber - 2) + "]");
-			addLine("br label %andcond" + lastLabelNumber);
+			for (int i = 1; i < operands.size(); i++) {
+				builder.append("andcond" + lastLabelNumber++ + ":\n");
+				addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %andcond" + lastLabelNumber++ + ", label %andcond"
+						+ lastLabelNumber);
+				builder.append("andcond" + (lastLabelNumber - 1) + ":\n");
+				operands.get(i).accept(this);
+				addLine("br label %andcond" + lastLabelNumber);
+				builder.append("andcond" + lastLabelNumber++ + ":\n");
+				addLine("%_" + lastRegisterNumber++ + " = phi i1 [0, %andcond" + (lastLabelNumber - 3) + "], [%_"
+						+ (lastRegisterNumber - 2) + ", %andcond" + (lastLabelNumber - 2) + "]");
+				addLine("br label %andcond" + lastLabelNumber);
+			}
+			builder.append("andcond" + lastLabelNumber + ":\n");
 		}
-		builder.append("andcond" + lastLabelNumber + ":\n");
-	}
 
-	@Override
-	public void visit(LtExpr e) {
-		String lv, rv;
-		e.e1().accept(this);
-		lv = "%_" + (lastRegisterNumber - 1);
-		e.e2().accept(this);
-		rv = "%_" + (lastRegisterNumber - 1);
-		addLine("%_" + lastRegisterNumber++ + " = icmp slt i32 " + lv + ", " + rv);
-	}
-
-	private void visitBinaryExpr(BinaryExpr e, String opt) {
-		String e1, e2;
-		e.e1().accept(this);
-		e1 = "%_" + (lastRegisterNumber - 1);
-		e.e2().accept(this);
-		e2 = "%_" + (lastRegisterNumber - 1);
-		addLine("%_" + lastRegisterNumber++ + " = " + opt + " i32 " + e1 + ", " + e2);
-	}
-
-	@Override
-	public void visit(AddExpr e) {
-		visitBinaryExpr(e, "add");
-	}
-
-	@Override
-	public void visit(SubtractExpr e) {
-		visitBinaryExpr(e, "sub");
-	}
-
-	@Override
-	public void visit(MultExpr e) {
-		visitBinaryExpr(e, "mul");
-	}
-
-	@Override
-	public void visit(NotExpr e) {
-		String eval;
-		e.accept(this);
-		eval = "%_" + (lastRegisterNumber - 1);
-		addLine("%_" + lastRegisterNumber++ + " = sub i1 1, " + eval);
-	}
-
-	@Override
-	public void visit(IntegerLiteralExpr e) {
-		addLine("%_" + lastRegisterNumber++ + " = add i32 0, " + e.num());
-	}
-
-	@Override
-	public void visit(TrueExpr e) {
-		addLine("%_" + lastRegisterNumber++ + " = add i1 1, 0");
-	}
-
-	@Override
-	public void visit(FalseExpr e) {
-		addLine("%_" + lastRegisterNumber++ + " = add i1 0, 0");
-	}
-
-	@Override
-	public void visit(IdentifierExpr e) {
-		Symbol var = e.getSymbolTable().varLookup(e.id());
-		String type = TypeDecider.llvmType(var.getDecl());
-		SymbolKind kind = var.getKind();
-		String id = e.id();
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
-			id = "_" + (lastRegisterNumber - 1);
+		@Override
+		public void visit(LtExpr e) {
+			String lv, rv;
+			e.e1().accept(this);
+			lv = "%_" + (lastRegisterNumber - 1);
+			e.e2().accept(this);
+			rv = "%_" + (lastRegisterNumber - 1);
+			addLine("%_" + lastRegisterNumber++ + " = icmp slt i32 " + lv + ", " + rv);
 		}
-		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + id);
-	}
 
-	@Override
-	public void visit(IntAstType t) {
-		builder.append("i32");
-	}
+		private void visitBinaryExpr(BinaryExpr e, String opt) {
+			String e1, e2;
+			e.e1().accept(this);
+			e1 = "%_" + (lastRegisterNumber - 1);
+			e.e2().accept(this);
+			e2 = "%_" + (lastRegisterNumber - 1);
+			addLine("%_" + lastRegisterNumber++ + " = " + opt + " i32 " + e1 + ", " + e2);
+		}
 
-	@Override
-	public void visit(BoolAstType t) {
-		builder.append("i1");
-	}
+		@Override
+		public void visit(AddExpr e) {
+			visitBinaryExpr(e, "add");
+		}
 
-	@Override
-	public void visit(IntArrayAstType t) {
-		builder.append("i32*");
-	}
+		@Override
+		public void visit(SubtractExpr e) {
+			visitBinaryExpr(e, "sub");
+		}
 
-	@Override
-	public void visit(RefType t) {
-		builder.append("i8*");
-	}
+		@Override
+		public void visit(MultExpr e) {
+			visitBinaryExpr(e, "mul");
+		}
+
+		@Override
+		public void visit(NotExpr e) {
+			String eval;
+			e.accept(this);
+			eval = "%_" + (lastRegisterNumber - 1);
+			addLine("%_" + lastRegisterNumber++ + " = sub i1 1, " + eval);
+		}
+
+		@Override
+		public void visit(IntegerLiteralExpr e) {
+			addLine("%_" + lastRegisterNumber++ + " = add i32 0, " + e.num());
+		}
+
+		@Override
+		public void visit(TrueExpr e) {
+			addLine("%_" + lastRegisterNumber++ + " = add i1 1, 0");
+		}
+
+		@Override
+		public void visit(FalseExpr e) {
+			addLine("%_" + lastRegisterNumber++ + " = add i1 0, 0");
+		}
+
+		@Override
+		public void visit(IdentifierExpr e) {
+			String type = TypeDecider.llvmType(e.getSymbolTable().varLookup(e.id()).getDecl());
+			addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + e.id());
+		}
+
+		@Override
+		public void visit(IntAstType t) {
+			builder.append("i32");
+		}
+
+		@Override
+		public void visit(BoolAstType t) {
+			builder.append("i1");
+		}
+
+		@Override
+		public void visit(IntArrayAstType t) {
+			builder.append("i32*");
+		}
+
+		@Override
+		public void visit(RefType t) {
+			builder.append("i8*");
+		}
 }
