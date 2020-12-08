@@ -156,13 +156,17 @@ public class CompileVisitor implements Visitor {
 		String returnType = TypeDecider.llvmType(funcSymbol.getDecl().split(Symbol.DECL_MAJOR_SEP)[1]);
 		sig.append(returnType);
 		sig.append(" (i8*");
-		String[] splitted = funcSymbol.getDecl().split(Symbol.DECL_MAJOR_SEP)[0].split(Symbol.DECL_SEP);
-		for (int i = 0; i < splitted.length; i++) {
-			sig.append(", ");
-			callArgs.append(", ");
-			sig.append(TypeDecider.llvmType(splitted[i]));
-			callArgs.append(TypeDecider.llvmType(splitted[i]));
-			callArgs.append(" %_").append(actualsRegisters.indexOf(i));
+		String signature = funcSymbol.getDecl().split(Symbol.DECL_MAJOR_SEP)[0];
+		String[] splitted = signature.split(Symbol.DECL_SEP);
+		System.out.println(signature);
+		if (!signature.equals("")) {
+			for (int i = 0; i < splitted.length; i++) {
+				sig.append(", ");
+				callArgs.append(", ");
+				sig.append(TypeDecider.llvmType(splitted[i]));
+				callArgs.append(TypeDecider.llvmType(splitted[i]));
+				callArgs.append(" %_").append(actualsRegisters.get(i));
+			}
 		}
 		sig.append(")*");
 		s = String.format("%%_%d = bitcast i8* %%_%d to %s", castedFunc, funcPtr, sig.toString());
