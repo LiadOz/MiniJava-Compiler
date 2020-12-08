@@ -78,8 +78,7 @@ public class CompileVisitor implements Visitor {
 	@Override
 	public void visit(ClassDecl classDecl) {
 		for (var methodDecl : classDecl.methoddecls()) {
-			String s = String.format("define %s @%s.%s(i8* %%this", TypeDecider.llvmType(methodDecl.returnType()),
-					classDecl.name(), methodDecl.name());
+			String s = String.format("define i32 @%s.%s(i8* %%this", classDecl.name(), methodDecl.name());
 			builder.append(s);
 			methodDecl.accept(this);
 		}
@@ -168,8 +167,11 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(ThisExpr e) {
-		String s = String.format("%%_%d = add i8* 0, %%this", lastRegisterNumber++);
-		addLine(s);
+		// String s = String.format("%%_%d = add i8* 0, %%this", lastRegisterNumber++);
+		// addLine(s);
+		int casted = lastRegisterNumber++;
+		addLine(String.format("%%_%d = bitcast i8* %%this to i32*", casted));
+		addLine(String.format("%%_%d = bitcast i32* %%_%d to i8*", lastRegisterNumber++, casted));
 	}
 
 	@Override
@@ -477,7 +479,7 @@ public class CompileVisitor implements Visitor {
 	@Override
 	public void visit(NotExpr e) {
 		String eval;
-		e.accept(this);
+		e.e().accept(this);
 		eval = "%_" + (lastRegisterNumber - 1);
 		addLine("%_" + lastRegisterNumber++ + " = sub i1 1, " + eval);
 	}

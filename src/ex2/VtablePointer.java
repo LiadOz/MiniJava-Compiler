@@ -40,10 +40,10 @@ public class VtablePointer {
     }
 
     public List<VtableEntry> getSortedMethods() {
-        List<VtableEntry> ret = new ArrayList<VtableEntry>(funcToEntry.size());
+        VtableEntry[] ret = new VtableEntry[funcToEntry.size()];
         for (VtableEntry vte : funcToEntry.values()) {
-            ret.add(vte.getIndex(), vte);
+            ret[vte.getIndex()] = vte;
         }
-        return ret;
+        return Arrays.asList(ret);
     }
 }
