@@ -399,7 +399,7 @@ public class CompileVisitor implements Visitor {
 		if (kind == SymbolKind.FIELD) {
 			int offset = symbolMapping.get(var);
 			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
+			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to " + type + "*");
 			id = "_" + (lastRegisterNumber - 1);
 		}
 		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + id);
@@ -506,7 +506,7 @@ public class CompileVisitor implements Visitor {
 		if (kind == SymbolKind.FIELD) {
 			int offset = symbolMapping.get(var);
 			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
+			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to " + type + "*");
 			id = "_" + (lastRegisterNumber - 1);
 		}
 		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + id);
