@@ -91,7 +91,7 @@ public class CompileClassesVisitor implements Visitor {
 
     @Override
     public void visit(MethodDecl methodDecl) {
-        builder.append("\t i8* bitcast (i32 (i8*, ");
+        builder.append(String.format("\t i8* bitcast (%s (i8*, ", TypeDecider.llvmType(methodDecl.returnType())));
 
         for (var formalArg : methodDecl.formals()) {
             formalArg.accept(this);

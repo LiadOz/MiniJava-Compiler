@@ -82,7 +82,7 @@ public class CompileVisitor implements Visitor {
 	@Override
 	public void visit(ClassDecl classDecl) {
 		for (var methodDecl : classDecl.methoddecls()) {
-			String s = String.format("define i32 @%s.%s(i8* %%this", classDecl.name(), methodDecl.name());
+			String s = String.format("define %s @%s.%s(i8* %%this", TypeDecider.llvmType(methodDecl.returnType()), classDecl.name(), methodDecl.name());
 			builder.append(s);
 			methodDecl.accept(this);
 		}
@@ -103,7 +103,7 @@ public class CompileVisitor implements Visitor {
 		for (var statement : methodDecl.body())
 			statement.accept(this);
 		methodDecl.ret().accept(this);
-		addLine(String.format("ret i32 %%_%d", lastRegisterNumber - 1));
+		addLine(String.format("ret %s %%_%d", TypeDecider.llvmType(methodDecl.returnType()), lastRegisterNumber - 1));
 		builder.append("}\n\n");
 	}
 
