@@ -5,7 +5,7 @@ import ast.*;
 public class TypeDecider {
     public static String llvmType(String t) {
         switch (t) {
-        	case "bool":
+        case "bool":
             case "boolean": return "i1";
             case "int": return "i32";
             case "int[]": return "i32*";
