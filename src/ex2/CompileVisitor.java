@@ -419,18 +419,10 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(AssignStatement assignStatement) {
-		Symbol var = assignStatement.getSymbolTable().varLookup(assignStatement.lv());
-		String type = TypeDecider.llvmType(var.getDecl()), rv;
-		SymbolKind kind = var.getKind();
-		String id = assignStatement.lv();
+		String[] lvData = getLValue(assignStatement.lv(), assignStatement.getSymbolTable());
+		String id = lvData[0], type = lvData[1], rv;
 		assignStatement.rv().accept(this);
 		rv = "%_" + (lastRegisterNumber - 1);
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to " + type + "*");
-			id = "_" + (lastRegisterNumber - 1);
-		}
 		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + id);
 	}
 
@@ -530,16 +522,8 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(IdentifierExpr e) {
-		Symbol var = e.getSymbolTable().varLookup(e.id());
-		String type = TypeDecider.llvmType(var.getDecl());
-		SymbolKind kind = var.getKind();
-		String id = e.id();
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to " + type + "*");
-			id = "_" + (lastRegisterNumber - 1);
-		}
+		String[] lvData = getLValue(e.id(), e.getSymbolTable());
+		String id = lvData[0], type = lvData[1];
 		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + id);
 	}
 
