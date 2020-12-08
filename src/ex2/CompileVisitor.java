@@ -5,7 +5,6 @@ import ex1.ClassMapping;
 import ex1.StaticClassVisitor;
 import ex1.Symbol;
 import ex1.SymbolTable;
-import ex1.SymbolKind;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,41 +25,6 @@ public class CompileVisitor implements Visitor {
 	public String getString() {
 		return builder.toString();
 	}
-	
-	public void helperFuncAppend() {
-		builder.append("declare i8* @calloc(i32, i32)\n"
-				+ "declare i32 @printf(i8*, ...)\n"
-				+ "declare void @exit(i32)\n"
-				+ "\n"
-				+ "@_cint = constant [4 x i8] c\"%d\\0a\\00\"\n"
-				+ "@_cOOB = constant [15 x i8] c\"Out of bounds\\0a\\00\"\n"
-				+ "define void @print_int(i32 %i) {\n"
-				+ "	%_str = bitcast [4 x i8]* @_cint to i8*\n"
-				+ "	call i32 (i8*, ...) @printf(i8* %_str, i32 %i)\n"
-				+ "	ret void\n"
-				+ "}\n"
-				+ "\n"
-				+ "define void @throw_oob() {\n"
-				+ "	%_str = bitcast [15 x i8]* @_cOOB to i8*\n"
-				+ "	call i32 (i8*, ...) @printf(i8* %_str)\n"
-				+ "	call void @exit(i32 1)\n"
-				+ "	ret void\n"
-				+ "}\n");
-		builder.append("define i32 @main() {\n"
-				+ "	%_0 = call i8* @calloc(i32 8, i32 8)\n"
-				+ "	%_1 = bitcast i8* %_0 to i8***\n"
-				+ "	%_2 = getelementptr [1 x i8*], [1 x i8*]* @.Simple_vtable, i32 0, i32 0\n"
-				+ "	store i8** %_2, i8*** %_1\n"
-				+ "	%_3 = bitcast i8* %_0 to i8***\n"
-				+ "	%_4 = load i8**, i8*** %_3\n"
-				+ "	%_5 = getelementptr i8*, i8** %_4, i32 0\n"
-				+ "	%_6 = load i8*, i8** %_5\n"
-				+ "	%_7 = bitcast i8* %_6 to i32 (i8*)*\n"
-				+ "	%_8 = call i32 %_7(i8* %_0)\n"
-				+ "	call void (i32) @print_int(i32 %_8)\n"
-				+ "	ret i32 0\n"
-				+ "}\n"); //delete
-	}
 
 	@Override
 	public void visit(Program program) {
@@ -69,7 +33,7 @@ public class CompileVisitor implements Visitor {
 		builder.append(ccv.getString());
 		symbolMapping = ccv.getMapping();
 		pointerMap = ccv.getPointerMap();
-		helperFuncAppend(); //test
+
 		program.mainClass().accept(this);
 		for (var classDecl : program.classDecls())
 			classDecl.accept(this);
@@ -285,19 +249,10 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(AssignStatement assignStatement) {
-		Symbol var = assignStatement.getSymbolTable().varLookup(assignStatement.lv());
-		String type = TypeDecider.llvmType(var.getDecl()), rv;
-		SymbolKind kind = var.getKind();
-		String id = assignStatement.lv();
+		String type = TypeDecider.llvmType(assignStatement.getSymbolTable().varLookup(assignStatement.lv()).getDecl()), rv;
 		assignStatement.rv().accept(this);
 		rv = "%_" + (lastRegisterNumber - 1);
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
-			id = "_" + (lastRegisterNumber - 1);
-		}
-		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + id);
+		addLine("store " + type + " " + rv + ", " + type + "* " + "%" + assignStatement.lv());
 	}
 
 	public void getAndOperands(LinkedList<Expr> operands, AndExpr e) {
@@ -394,17 +349,8 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(IdentifierExpr e) {
-		Symbol var = e.getSymbolTable().varLookup(e.id());
-		String type = TypeDecider.llvmType(var.getDecl());
-		SymbolKind kind = var.getKind();
-		String id = e.id();
-		if (kind == SymbolKind.FIELD) {
-			int offset = symbolMapping.get(var);
-			addLine("%_" + lastRegisterNumber++ + " = getelementptr i8, i8* %this, i32 " + offset);
-			addLine("%_" + lastRegisterNumber++ + " = bitcast i8* %_" + (lastRegisterNumber - 2) + " to i32*");
-			id = "_" + (lastRegisterNumber - 1);
-		}
-		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + id);
+		String type = TypeDecider.llvmType(e.getSymbolTable().varLookup(e.id()).getDecl());
+		addLine("%_" + lastRegisterNumber++ + " = load " + type + ", " + type + "* %" + e.id());
 	}
 
 	@Override
