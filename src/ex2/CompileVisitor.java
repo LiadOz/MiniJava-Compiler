@@ -227,29 +227,30 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(IfStatement ifStatement) {
+		int labelNums[] = { lastLabelNumber++, lastLabelNumber++, lastLabelNumber++ };
 		ifStatement.cond().accept(this);
-		addLine("br i1 %_" + (lastRegisterNumber - 1) + ", " + "label %label" + lastLabelNumber + ", label %label"
-				+ (lastLabelNumber + 1));
-		builder.append("label" + lastLabelNumber++ + ":\n");
+		addLine("br i1 %_" + (lastRegisterNumber - 1) + ", " + "label %label" + labelNums[0] + ", label %label"
+				+ labelNums[1]);
+		builder.append("label" + labelNums[0] + ":\n");
 		ifStatement.thencase().accept(this);
-		addLine("br label %label" + (lastLabelNumber + 1) + "\n");
-		builder.append("label" + lastLabelNumber++ + ":\n");
+		addLine("br label %label" + labelNums[2] + "\n");
+		builder.append("label" + labelNums[1] + ":\n");
 		ifStatement.elsecase().accept(this);
-		addLine("br label %label" + lastLabelNumber + "\n");
-		builder.append("label" + lastLabelNumber++ + ":\n");
+		addLine("br label %label" + labelNums[2] + "\n");
+		builder.append("label" + labelNums[2] + ":\n");
 	}
 
 	@Override
 	public void visit(WhileStatement whileStatement) {
-		addLine("br label %loop" + lastLabelNumber++);
-		addLine("loop" + (lastLabelNumber - 1) + ":"); // loop cond
+		int labelNums[] = { lastLabelNumber++, lastLabelNumber++, lastLabelNumber++ };
+		addLine("br label %loop" + labelNums[0]);
+		builder.append("loop" + labelNums[0] + ":"); // loop cond
 		whileStatement.cond().accept(this);
-		addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %loop" + lastLabelNumber++ + ", label %loop"
-				+ lastLabelNumber++);
-		addLine("loop" + (lastLabelNumber - 2) + ":"); // loop body
+		addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %loop" + labelNums[1] + ", label %loop" + labelNums[2]);
+		builder.append("loop" + labelNums[1] + ":\n"); // loop body
 		whileStatement.body().accept(this);
-		addLine("br label %loop" + (lastLabelNumber - 3));
-		addLine("loop" + (lastLabelNumber - 1) + ":"); // out of loop
+		addLine("br label %loop" + labelNums[0]);
+		builder.append("loop" + labelNums[2] + ":\n"); // out of loop
 	}
 
 	// ARRAYS
@@ -428,22 +429,24 @@ public class CompileVisitor implements Visitor {
 	@Override
 	public void visit(AndExpr e) {
 		LinkedList<Expr> operands = new LinkedList<Expr>();
+		int labelNums[] = {0, 0, 0, 0};
 		getAndOperands(operands, e);
 		operands.get(0).accept(this);
 		addLine("br label %andcond" + lastLabelNumber);
 		for (int i = 1; i < operands.size(); i++) {
-			builder.append("andcond" + lastLabelNumber++ + ":\n");
-			addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %andcond" + lastLabelNumber++ + ", label %andcond"
-					+ lastLabelNumber);
-			builder.append("andcond" + (lastLabelNumber - 1) + ":\n");
+			labelNums = new int[] { lastLabelNumber++, lastLabelNumber++, lastLabelNumber++, lastLabelNumber };
+			builder.append("andcond" + labelNums[0] + ":\n");
+			addLine("br i1 %_" + (lastRegisterNumber - 1) + ", label %andcond" + labelNums[1] + ", label %andcond"
+					+ labelNums[2]);
+			builder.append("andcond" + labelNums[1] + ":\n");
 			operands.get(i).accept(this);
-			addLine("br label %andcond" + lastLabelNumber);
-			builder.append("andcond" + lastLabelNumber++ + ":\n");
-			addLine("%_" + lastRegisterNumber++ + " = phi i1 [0, %andcond" + (lastLabelNumber - 3) + "], [%_"
-					+ (lastRegisterNumber - 2) + ", %andcond" + (lastLabelNumber - 2) + "]");
-			addLine("br label %andcond" + lastLabelNumber);
+			addLine("br label %andcond" + labelNums[2]);
+			builder.append("andcond" + labelNums[2] + ":\n");
+			addLine("%_" + lastRegisterNumber++ + " = phi i1 [0, %andcond" + labelNums[0] + "], [%_"
+					+ (lastRegisterNumber - 2) + ", %andcond" + labelNums[1] + "]");
+			addLine("br label %andcond" + labelNums[3]);
 		}
-		builder.append("andcond" + lastLabelNumber + ":\n");
+		builder.append("andcond" + labelNums[3] + ":\n");
 	}
 
 	@Override
