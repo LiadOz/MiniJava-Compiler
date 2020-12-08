@@ -75,6 +75,10 @@ public class CompileVisitor implements Visitor {
 		builder.append("\t").append(line).append("\n");
 	}
 
+	private void addLabel(String label){
+		builder.append(label).append("\n");
+	}
+
 	@Override
 	public void visit(ClassDecl classDecl) {
 		for (var methodDecl : classDecl.methoddecls()) {
@@ -250,135 +254,135 @@ public class CompileVisitor implements Visitor {
 
 	// ARRAYS
 	public void visit(AssignArrayStatement assignArrayStatement) {
-        var arrayName = assignArrayStatement.lv();
-        var arrayRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = load i32*, i32** %%%s", arrayRegister, arrayName));
+		var arrayName = assignArrayStatement.lv();
+		var arrayRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = load i32*, i32** %%%s", arrayRegister, arrayName));
 
-        assignArrayStatement.index().accept(this);
-        var indexRegister = lastRegisterNumber-1;
-        var indexComparisonToZeroRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = icmp slt i32 %%_%s, 0", indexComparisonToZeroRegister, indexRegister));
+		assignArrayStatement.index().accept(this);
+		var indexRegister = lastRegisterNumber-1;
+		var indexComparisonToZeroRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = icmp slt i32 %%_%s, 0", indexComparisonToZeroRegister, indexRegister));
 
-        var label1 = lastLabelNumber++;
-        var label2 = lastLabelNumber++;
-        addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
-        addLine(String.format("arr_check%s:", label1));
-        addLine("call void @throw_oob()\n");
-        addLine("br label %arr_check" + label2);
-        addLine(String.format("arr_check%s:", label2));
+		var label1 = lastLabelNumber++;
+		var label2 = lastLabelNumber++;
+		addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
+		addLabel(String.format("arr_check%s:", label1));
+		addLine("call void @throw_oob()\n");
+		addLine("br label %arr_check" + label2);
+		addLabel(String.format("arr_check%s:", label2));
 
-        var lengthPointerRegister = lastRegisterNumber++;
-        var lengthRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthPointerRegister, arrayRegister));
-        addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthPointerRegister));
+		var lengthPointerRegister = lastRegisterNumber++;
+		var lengthRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthPointerRegister, arrayRegister));
+		addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthPointerRegister));
 
-        var indexComparisonToLengthRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = icmp sle i32 %%_%s, %%_%s", indexComparisonToLengthRegister, lengthRegister, indexRegister));
+		var indexComparisonToLengthRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = icmp sle i32 %%_%s, %%_%s", indexComparisonToLengthRegister, lengthRegister, indexRegister));
 
-        var label3 = lastLabelNumber++;
-        var label4 = lastLabelNumber++;
+		var label3 = lastLabelNumber++;
+		var label4 = lastLabelNumber++;
 
-        addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
-        addLine(String.format("arr_check%s:", label3));
-        addLine("call void @throw_oob()");
-        addLine(String.format("br label arr_check%s", label4));
-        addLine(String.format("arr_check%s:",label4));
-        var indexPlusOneRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
+		addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
+		addLabel(String.format("arr_check%s:", label3));
+		addLine("call void @throw_oob()");
+		addLine(String.format("br label %%arr_check%s", label4));
+		addLabel(String.format("arr_check%s:",label4));
+		var indexPlusOneRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
 
-        var elementPointerRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 %%_%s", elementPointerRegister, arrayRegister, indexPlusOneRegister));
+		var elementPointerRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 %%_%s", elementPointerRegister, arrayRegister, indexPlusOneRegister));
 
-        assignArrayStatement.rv().accept(this);
-        var assignValueRegister = lastRegisterNumber - 1;
+		assignArrayStatement.rv().accept(this);
+		var assignValueRegister = lastRegisterNumber - 1;
 
-        addLine(String.format("store i32 %%_%s, i32* %%_%s", assignValueRegister, elementPointerRegister));
+		addLine(String.format("store i32 %%_%s, i32* %%_%s", assignValueRegister, elementPointerRegister));
     }
 
     @Override
     public void visit(ArrayAccessExpr e) {
-        e.arrayExpr().accept(this);
-        var arrayRegister = lastRegisterNumber - 1;
-        e.indexExpr().accept(this);
-        var indexRegister = lastRegisterNumber - 1;
+		e.arrayExpr().accept(this);
+		var arrayRegister = lastRegisterNumber - 1;
+		e.indexExpr().accept(this);
+		var indexRegister = lastRegisterNumber - 1;
 
-        var indexComparisonToZeroRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = icmp slt i32 %%_%s, 0", indexComparisonToZeroRegister, indexRegister));
+		var indexComparisonToZeroRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = icmp slt i32 %%_%s, 0", indexComparisonToZeroRegister, indexRegister));
 
-        var label1 = lastLabelNumber++;
-        var label2 = lastLabelNumber++;
-        addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
-        addLine(String.format("arr_check%s:", label1));
-        addLine("call void @throw_oob()\n");
-        addLine("br label %arr_check" + label2);
-        addLine(String.format("arr_check%s:", label2));
+		var label1 = lastLabelNumber++;
+		var label2 = lastLabelNumber++;
+		addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToZeroRegister, label1, label2));
+		addLabel(String.format("arr_check%s:", label1));
+		addLine("call void @throw_oob()\n");
+		addLine("br label %arr_check" + label2);
+		addLabel(String.format("arr_check%s:", label2));
 
-        var lengthPointerRegister = lastRegisterNumber++;
-        var lengthRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthPointerRegister, arrayRegister));
-        addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthPointerRegister));
+		var lengthPointerRegister = lastRegisterNumber++;
+		var lengthRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthPointerRegister, arrayRegister));
+		addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthPointerRegister));
 
-        var indexComparisonToLengthRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = icmp sle i32 %%_%s, %%_%s", indexComparisonToLengthRegister, lengthRegister, indexRegister));
+		var indexComparisonToLengthRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = icmp sle i32 %%_%s, %%_%s", indexComparisonToLengthRegister, lengthRegister, indexRegister));
 
-        var label3 = lastLabelNumber++;
-        var label4 = lastLabelNumber++;
+		var label3 = lastLabelNumber++;
+		var label4 = lastLabelNumber++;
 
-        addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
-        addLine(String.format("arr_check%s:", label3));
-        addLine("call void @throw_oob()");
-        addLine(String.format("br label arr_check%s", label4));
-        addLine(String.format("arr_check%s:",label4));
-        var indexPlusOneRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
+		addLine(String.format("br i1 %%_%s, label %%arr_check%s, label %%arr_check%s", indexComparisonToLengthRegister, label3, label4));
+		addLabel(String.format("arr_check%s:", label3));
+		addLine("call void @throw_oob()");
+		addLine(String.format("br label %%arr_check%s", label4));
+		addLabel(String.format("arr_check%s:",label4));
+		var indexPlusOneRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = add i32 %%_%s, 1", indexPlusOneRegister, indexRegister));
 
-        var elementPointerRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 %%_%s", elementPointerRegister, arrayRegister, indexPlusOneRegister));
-        var elementValueRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = load i32, i32* %%_%s", elementValueRegister, elementPointerRegister));
+		var elementPointerRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 %%_%s", elementPointerRegister, arrayRegister, indexPlusOneRegister));
+		var elementValueRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = load i32, i32* %%_%s", elementValueRegister, elementPointerRegister));
     }
 
     @Override
     public void visit(ArrayLengthExpr e) {
-        e.arrayExpr().accept(this);
-        var arrayRegister = lastRegisterNumber - 1;
-        var lengthElementPointerRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthElementPointerRegister, arrayRegister));
-        var lengthRegister = lastRegisterNumber++;
-        addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthElementPointerRegister));
+		e.arrayExpr().accept(this);
+		var arrayRegister = lastRegisterNumber - 1;
+		var lengthElementPointerRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = getelementptr i32, i32* %%_%s, i32 0", lengthElementPointerRegister, arrayRegister));
+		var lengthRegister = lastRegisterNumber++;
+		addLine(String.format("%%_%s = load i32, i32* %%_%s", lengthRegister, lengthElementPointerRegister));
     }
 
     @Override
     public void visit(NewIntArrayExpr e) {
-        e.lengthExpr().accept(this);
-        var lengthResultRegister = lastRegisterNumber - 1;
-        var compareToZeroResultRegister = lastRegisterNumber++;
+		e.lengthExpr().accept(this);
+		var lengthResultRegister = lastRegisterNumber - 1;
+		var compareToZeroResultRegister = lastRegisterNumber++;
 
-        addLine(String.format("%%_%s = icmp slt i32 %%_%s , 0", compareToZeroResultRegister, lengthResultRegister));
+		addLine(String.format("%%_%s = icmp slt i32 %%_%s , 0", compareToZeroResultRegister, lengthResultRegister));
 
-        var label1 = lastLabelNumber++;
-        var label2 = lastLabelNumber++;
+		var label1 = lastLabelNumber++;
+		var label2 = lastLabelNumber++;
 
 
-        addLine(String.format("br i1 %%_%s, label %%arr_alloc%s, label %%arr_alloc%s", compareToZeroResultRegister, label1, label2));
-        addLine(String.format("arr_alloc%s:",label1));
-        addLine("call void @throw_oob()\n");
-        addLine("br label %alloc_arr" + label2);
-        addLine(String.format("arr_alloc%s:",label2));
+		addLine(String.format("br i1 %%_%s, label %%arr_alloc%s, label %%arr_alloc%s", compareToZeroResultRegister, label1, label2));
+		addLabel(String.format("arr_alloc%s:",label1));
+		addLine("call void @throw_oob()\n");
+		addLine("br label %arr_alloc" + label2);
+		addLabel(String.format("arr_alloc%s:",label2));
 
-        var lengthPlusOneResultRegister = lastRegisterNumber++;
+		var lengthPlusOneResultRegister = lastRegisterNumber++;
 
-        addLine(String.format("%%_%s = add i32 %%_%s, 1", lengthPlusOneResultRegister, lengthResultRegister));
+		addLine(String.format("%%_%s = add i32 %%_%s, 1", lengthPlusOneResultRegister, lengthResultRegister));
 
-        var allocationRegister = lastRegisterNumber++;
+		var allocationRegister = lastRegisterNumber++;
 
-        addLine(String.format("%%_%s = call i8* @calloc(i32 4, i32 %%_%s)", allocationRegister, lengthPlusOneResultRegister));
+		addLine(String.format("%%_%s = call i8* @calloc(i32 4, i32 %%_%s)", allocationRegister, lengthPlusOneResultRegister));
 
-        var castRegister = lastRegisterNumber++;
+		var castRegister = lastRegisterNumber++;
 
-        addLine(String.format("%%_%s = bitcast i8* %%_%s to i32*", castRegister, allocationRegister));
+		addLine(String.format("%%_%s = bitcast i8* %%_%s to i32*", castRegister, allocationRegister));
 
-        addLine(String.format("store i32 %%_%s, i32* %%_%s", lengthResultRegister, allocationRegister));
+		addLine(String.format("store i32 %%_%s, i32* %%_%s", lengthResultRegister, castRegister));
 
     }
 
