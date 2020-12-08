@@ -45,21 +45,7 @@ public class CompileVisitor implements Visitor {
 				+ "	call i32 (i8*, ...) @printf(i8* %_str)\n"
 				+ "	call void @exit(i32 1)\n"
 				+ "	ret void\n"
-				+ "}\n");
-		builder.append("define i32 @main() {\n"
-				+ "	%_0 = call i8* @calloc(i32 8, i32 8)\n"
-				+ "	%_1 = bitcast i8* %_0 to i8***\n"
-				+ "	%_2 = getelementptr [1 x i8*], [1 x i8*]* @.Simple_vtable, i32 0, i32 0\n"
-				+ "	store i8** %_2, i8*** %_1\n"
-				+ "	%_3 = bitcast i8* %_0 to i8***\n"
-				+ "	%_4 = load i8**, i8*** %_3\n"
-				+ "	%_5 = getelementptr i8*, i8** %_4, i32 0\n"
-				+ "	%_6 = load i8*, i8** %_5\n"
-				+ "	%_7 = bitcast i8* %_6 to i32 (i8*)*\n"
-				+ "	%_8 = call i32 %_7(i8* %_0)\n"
-				+ "	call void (i32) @print_int(i32 %_8)\n"
-				+ "	ret i32 0\n"
-				+ "}\n"); //delete
+				+ "}\n\n");
 	}
 
 	@Override
@@ -77,7 +63,10 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(MainClass mainClass) {
-		
+	    builder.append("define i32 @main() {\n");
+	    mainClass.mainStatement().accept(this);
+	    addLine("ret i32 0");
+	    builder.append("}\n\n");
 	}
 
 	// OOP
@@ -158,7 +147,6 @@ public class CompileVisitor implements Visitor {
 		sig.append(" (i8*");
 		String signature = funcSymbol.getDecl().split(Symbol.DECL_MAJOR_SEP)[0];
 		String[] splitted = signature.split(Symbol.DECL_SEP);
-		System.out.println(signature);
 		if (!signature.equals("")) {
 			for (int i = 0; i < splitted.length; i++) {
 				sig.append(", ");
