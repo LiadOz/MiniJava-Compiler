@@ -171,11 +171,8 @@ public class CompileVisitor implements Visitor {
 
 	@Override
 	public void visit(ThisExpr e) {
-		// String s = String.format("%%_%d = add i8* 0, %%this", lastRegisterNumber++);
-		// addLine(s);
-		int casted = lastRegisterNumber++;
-		addLine(String.format("%%_%d = bitcast i8* %%this to i32*", casted));
-		addLine(String.format("%%_%d = bitcast i32* %%_%d to i8*", lastRegisterNumber++, casted));
+		String s = String.format("%%_%d = bitcast i8* %%this to i8*", lastRegisterNumber++);
+		addLine(s);
 	}
 
 	@Override
