@@ -3,6 +3,7 @@ import ex1.RefactorFactory;
 import ex1.RefactorProgram;
 import ex2.CompileVisitor;
 import ex2.ProgramCompiler;
+import ex3.SemanticChecker;
 
 import java.io.*;
 
@@ -37,8 +38,8 @@ public class Main {
                     outFile.write(astPrinter.getString());
 
                 } else if (action.equals("semantic")) {
-                    throw new UnsupportedOperationException("TODO - Ex. 3");
-
+                    SemanticChecker semCheck = new SemanticChecker();
+                    outFile.write(semCheck.check(prog));
                 } else if (action.equals("compile")) {
                     ProgramCompiler compile = new ProgramCompiler();
                     outFile.write(compile.compile(prog));

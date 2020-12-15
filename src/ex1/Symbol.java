@@ -36,4 +36,18 @@ public class Symbol {
     public AstNode getNode() {
         return node;
     }
+
+    public String getReturnType(){
+        if(kind != SymbolKind.METHOD){
+            throw new UnsupportedOperationException();
+        }
+        return decl.split(Symbol.DECL_MAJOR_SEP)[1];
+    }
+
+    public String[] getArgumentTypes(){
+        if(kind != SymbolKind.METHOD){
+            throw new UnsupportedOperationException();
+        }
+        return decl.split(Symbol.DECL_MAJOR_SEP)[0].split(Symbol.DECL_SEP);
+    }
 }

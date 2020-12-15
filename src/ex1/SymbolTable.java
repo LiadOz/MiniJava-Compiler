@@ -18,6 +18,10 @@ public class SymbolTable {
         this.parent = parent;
     }
 
+    public SymbolTable getParent(){
+        return parent;
+    }
+
     public void addVar(String id, Symbol s){
         if (varEntries.containsKey(id)) {
             throw new RuntimeException(id + " already in symbol table");

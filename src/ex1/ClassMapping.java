@@ -23,4 +23,16 @@ public class ClassMapping {
         return mapping.get(classId);
     }
 
+    // Needs testing
+    public boolean isValidSubclass(String father, String son){
+        var currentTable = mapping.get(son);
+        var targetTable = mapping.get(father);
+
+        while(currentTable != null){
+            if(currentTable == targetTable) return true;
+            currentTable = currentTable.getParent();
+        }
+        return false;
+    }
+
 }
