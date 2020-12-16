@@ -8,15 +8,17 @@ import ex1.SymbolTableVisitor;
 public class SemanticChecker {
 
     public String check(Program program){
-        try{
+        try {
+            program.accept(new InitialCheckerVisitor()); // in order to use SymbolTableVisitor
             ClassMapping classMap = new ClassMapping();
             SymbolTableVisitor symbolTableBuilder = new SymbolTableVisitor(new SymbolTable(), classMap);
             program.accept(symbolTableBuilder);
-            program.accept(new TypeCheckerVisitor(classMap));
             program.accept(new ClassCheckerVisitor(classMap));
+            program.accept(new TypeCheckerVisitor(classMap));
             program.accept(new VariableInitVisitor(classMap));
             return "OK\n";
-        } catch (Exception e){
+        } catch (SemanticException e) {
+            System.out.println(e.getMessage()); // for checking if cause is correct
             return "ERROR\n";
         }
     }
