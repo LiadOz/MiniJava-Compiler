@@ -63,7 +63,6 @@ public class SymbolTableVisitor implements Visitor {
                 decl.append(Symbol.DECL_SEP);
             decl.append(TypeDecider.javaType(formalArg.type()));
         }
-        System.out.println("problem here");
         decl.append(Symbol.DECL_MAJOR_SEP).append(TypeDecider.javaType(methodDecl.returnType()));
 
         Symbol method = new Symbol(

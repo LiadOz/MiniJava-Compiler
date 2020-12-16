@@ -59,7 +59,7 @@ public class ClassCheckerVisitor implements Visitor {
 
         }
 
-        methodDecl.accept(this);
+        methodDecl.returnType().accept(this);
         for (FormalArg formalArg : methodDecl.formals())
             formalArg.accept(this);
         for (VarDecl varDecl : methodDecl.vardecls())
@@ -77,7 +77,7 @@ public class ClassCheckerVisitor implements Visitor {
 
     @Override
     public void visit(VarDecl varDecl) {
-        varDecl.accept(this);
+        varDecl.type().accept(this);
     }
 
     @Override
