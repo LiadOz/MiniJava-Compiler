@@ -32,7 +32,10 @@ public class StaticClassVisitor implements Visitor {
     public void visit(NewObjectExpr e) {
         className = e.classId();
     }
-
+    @Override
+    public void visit(TrueExpr e) { className = "boolean";}
+    @Override
+    public void visit(FalseExpr e) { className = "boolean";}
     @Override
     public void visit(Program program) { }
     @Override
@@ -73,10 +76,6 @@ public class StaticClassVisitor implements Visitor {
     public void visit(ArrayLengthExpr e) { }
     @Override
     public void visit(MethodCallExpr e) { }
-    @Override
-    public void visit(TrueExpr e) { }
-    @Override
-    public void visit(FalseExpr e) { }
     @Override
     public void visit(NotExpr e) { }
     @Override
