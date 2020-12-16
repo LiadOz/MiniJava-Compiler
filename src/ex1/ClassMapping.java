@@ -17,7 +17,10 @@ public class ClassMapping {
         mapping.put(classId, table);
     }
 
+    // returns null if class is a simple type, if class doesn't exist throws error
     public SymbolTable get(String classId) {
+        if (isSimpleType(classId))
+            return null;
         if (!mapping.containsKey(classId))
             throw new RuntimeException(classId + " not mapped");
         return mapping.get(classId);
@@ -25,6 +28,9 @@ public class ClassMapping {
 
     // Needs testing
     public boolean isValidSubclass(String father, String son){
+        if (isSimpleType(father) || isSimpleType(son)) // handle case of int, int[], boolean
+            return father.equals(son);
+
         var currentTable = mapping.get(son);
         var targetTable = mapping.get(father);
 
@@ -33,6 +39,10 @@ public class ClassMapping {
             currentTable = currentTable.getParent();
         }
         return false;
+    }
+
+    private static boolean isSimpleType(String className) {
+        return className.equals("int") || className.equals("int[]") || className.equals("boolean");
     }
 
 }

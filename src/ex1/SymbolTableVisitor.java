@@ -251,7 +251,7 @@ public class SymbolTableVisitor implements Visitor {
     @Override
     public void visit(BoolAstType t) {
         t.setSymbolTable(currTable);
-        varType = "bool";
+        varType = "boolean";
     }
 
     @Override
