@@ -25,6 +25,9 @@ public class ClassMapping {
 
     // Needs testing
     public boolean isValidSubclass(String father, String son){
+        if (isSimpleType(father) || isSimpleType(son)) // handle case of int, int[], boolean
+            return father.equals(son);
+
         var currentTable = mapping.get(son);
         var targetTable = mapping.get(father);
 
@@ -33,6 +36,11 @@ public class ClassMapping {
             currentTable = currentTable.getParent();
         }
         return false;
+    }
+
+    private static boolean isSimpleType(String className) {
+        return className.equals("int") || className.equals("int[]") ||
+                className.equals("boolean") || className.equals("bool");
     }
 
 }
