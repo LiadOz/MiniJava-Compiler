@@ -1,7 +1,7 @@
 package ex3;
 
 public class SemanticException extends RuntimeException {
-    SemanticException(String message) {
+    public SemanticException(String message) {
         super(message);
     }
 }

@@ -3,10 +3,15 @@ package ex1;
 import ast.*;
 
 public class StaticClassVisitor implements Visitor {
+    public static final String THIS_STRING = "1CURRENT"; // 1 is because it can't be used in real class name
     private String className = null;
 
     public String getResult() {
         return className;
+    }
+
+    public void clearResult() {
+        className = null;
     }
 
     @Override
@@ -16,11 +21,12 @@ public class StaticClassVisitor implements Visitor {
     @Override
     public void visit(IdentifierExpr e) {
         className = e.getSymbolTable().varLookup(e.id()).getDecl();
+        // System.out.println(e.id() + " " + className);
     }
 
     @Override
     public void visit(ThisExpr e) {
-        className = "current";
+        className = THIS_STRING;
     }
 
     @Override

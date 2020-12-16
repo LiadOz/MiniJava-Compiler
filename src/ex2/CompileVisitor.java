@@ -114,7 +114,7 @@ public class CompileVisitor implements Visitor {
 		e.ownerExpr().accept(classFinder);
 		String ownerClass = classFinder.getResult();
 		SymbolTable st;
-		if (ownerClass.equals("current"))
+		if (ownerClass.equals(StaticClassVisitor.THIS_STRING))
 			st = e.getSymbolTable();
 		else
 			st = classMapping.get(ownerClass);

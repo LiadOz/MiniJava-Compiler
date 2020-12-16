@@ -1,5 +1,7 @@
 package ex1;
 
+import ex3.SemanticException;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class SymbolTable {
 
     public void addVar(String id, Symbol s){
         if (varEntries.containsKey(id)) {
-            throw new RuntimeException(id + " already in symbol table");
+            throw new SemanticException(id + " already in symbol table"); // Points 4, 24
         }
         varEntries.put(id, s);
     }
@@ -44,7 +46,7 @@ public class SymbolTable {
 
     public void addMethod(String id, Symbol s){
         if (methodEntries.containsKey(id)) {
-            throw new RuntimeException(id + " already in symbol table");
+            throw new SemanticException(id + " already in symbol table"); // Point 5
         }
         methodEntries.put(id, s);
     }
@@ -69,7 +71,7 @@ public class SymbolTable {
                 return parent.varLookup(id);
             }
             else {
-                throw new RuntimeException(id + " not in symbol table");
+                throw new SemanticException(id + " not in symbol table");
             }
         }
         return ret;
@@ -82,7 +84,7 @@ public class SymbolTable {
                 return parent.methodLookup(id);
             }
             else {
-                throw new RuntimeException(id + " not in symbol table");
+                throw new SemanticException(id + " not in symbol table"); // Point 11
             }
         }
         return ret;

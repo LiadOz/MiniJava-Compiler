@@ -17,6 +17,8 @@ public class TypeDecider {
 	}
 
 	public static String javaType(AstType t) {
+		System.out.println("class is ");
+		System.out.println(t.getClass());
 		if (t instanceof BoolAstType)
 			return "boolean";
 		else if (t instanceof IntAstType)
