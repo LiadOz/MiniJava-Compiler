@@ -48,6 +48,9 @@ public class Symbol {
         if(kind != SymbolKind.METHOD){
             throw new UnsupportedOperationException();
         }
-        return decl.split(Symbol.DECL_MAJOR_SEP)[0].split(Symbol.DECL_SEP);
+        String rightSide = decl.split(Symbol.DECL_MAJOR_SEP)[0];
+        if (rightSide.equals(""))
+            return new String[0];
+        return rightSide.split(Symbol.DECL_SEP);
     }
 }
