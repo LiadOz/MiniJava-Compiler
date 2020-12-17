@@ -43,8 +43,9 @@ public class ClassCheckerVisitor implements Visitor {
     public void visit(MethodDecl methodDecl) {
         String methodName = methodDecl.name();
         Symbol currSymbol = methodDecl.getSymbolTable().methodLookup(methodName);
-        try { // Point 6
-            Symbol overridden = methodDecl.getSymbolTable().getParent().methodLookup(methodName);
+
+        Symbol overridden = methodDecl.getSymbolTable().getOverriddenMethod(methodName);
+        if (overridden != null) { // Point 6
             String[] oParams = overridden.getArgumentTypes();
             String[] cParams = currSymbol.getArgumentTypes();
             if (oParams.length != cParams.length)
@@ -55,9 +56,8 @@ public class ClassCheckerVisitor implements Visitor {
             }
             if (!classMap.isValidSubclass(overridden.getReturnType(), currSymbol.getReturnType()))
                 throw new SemanticException("method override - bad return type");
-        } catch (Exception e) {
-
         }
+
 
         methodDecl.returnType().accept(this);
         for (FormalArg formalArg : methodDecl.formals())

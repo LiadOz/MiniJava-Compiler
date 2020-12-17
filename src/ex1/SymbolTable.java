@@ -25,7 +25,12 @@ public class SymbolTable {
     }
 
     public void addVar(String id, Symbol s){
-        if (varEntries.containsKey(id)) {
+        boolean inside = false;
+        try {
+            varLookup(id);
+            inside = true;
+        } catch (SemanticException e) { }
+        if (inside) {
             throw new SemanticException(id + " already in symbol table"); // Points 4, 24
         }
         varEntries.put(id, s);
@@ -100,6 +105,21 @@ public class SymbolTable {
         }
         return ret;
 
+    }
+
+    public Symbol getOverriddenMethod(String id) {
+        try {
+            Symbol orig = methodLookup(id);
+            Symbol curr = orig;
+            SymbolTable st = this.parent;
+            while (curr == orig) {
+                curr = st.methodLookup(id);
+                st = st.parent;
+            }
+            return curr;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void printTable(){
