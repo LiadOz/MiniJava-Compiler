@@ -162,8 +162,8 @@ public class ClassCheckerVisitor implements Visitor {
         classFinder.clearResult();
         e.ownerExpr().accept(classFinder); // this should be ref type else it is checked in TypeChecker i.e point 10
         var ownerClass = classFinder.getResult();
-        if (ownerClass == null)
-            throw new SemanticException("method call - invalid owner expression");
+        if (ownerClass == null || ownerClass.equals("int") || ownerClass.equals("int[]") || ownerClass.equals("boolean"))
+            throw new SemanticException("method call - invalid owner expression"); // first half of 11
 
         SymbolTable st;
         if (ownerClass.equals(StaticClassVisitor.THIS_STRING))
@@ -177,24 +177,8 @@ public class ClassCheckerVisitor implements Visitor {
         if (origArgs.length != e.actuals().size())
             throw new SemanticException("method call - invalid number of arguments");
 
-        int i = 0;
         for (var expr : e.actuals()) { // there is no need to accept each actual
             expr.accept(this);
-            classFinder.clearResult();
-            expr.accept(classFinder);
-            String className = classFinder.getResult();
-            if (className == null) {
-                System.out.printf("class name = %s%n", e.methodId());
-                throw new SemanticException("method call - invalid argument expression");
-            }
-            if (className.equals(StaticClassVisitor.THIS_STRING)) {
-                className = currClass;
-            }
-            if (!classMap.isValidSubclass(origArgs[i], className)) {
-                System.out.printf("i = %d, orig = %s, got = %s%n", i, origArgs[i], className);
-                throw new SemanticException("method call - invalid argument class");
-            }
-            i++;
         }
     }
 

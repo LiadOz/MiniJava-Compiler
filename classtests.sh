@@ -1,13 +1,4 @@
 #!/bin/bash
-echo BinarySearch
-java -jar mjavac.jar unmarshal semantic tests/BinarySearch.java.xml out.res
-diff out.res tests/ok.res
-echo BubbleSort
-java -jar mjavac.jar unmarshal semantic tests/BubbleSort.java.xml out.res
-diff out.res tests/ok.res
-echo LinearSearch
-java -jar mjavac.jar unmarshal semantic tests/LinearSearch.java.xml out.res
-diff out.res tests/ok.res
 echo GoodOverriding
 java -jar mjavac.jar unmarshal semantic tests/GoodOverriding.xml out.res
 diff out.res tests/ok.res
@@ -47,3 +38,33 @@ diff out.res tests/fail.res
 echo SubclassDuplicateMethod
 java -jar mjavac.jar unmarshal semantic tests/SubclassDuplicateMethod.xml out.res
 diff out.res tests/fail.res
+echo BadCaller
+java -jar mjavac.jar unmarshal semantic tests/BadCaller.xml out.res
+diff out.res tests/fail.res
+echo ComplexCaller
+java -jar mjavac.jar unmarshal semantic tests/ComplexCaller.xml out.res
+diff out.res tests/fail.res
+echo BinarySearch
+java -jar mjavac.jar unmarshal semantic examples/ast/BinarySearch.java.xml out.res
+diff out.res tests/ok.res
+echo BinaryTree
+java -jar mjavac.jar unmarshal semantic examples/ast/BinaryTree.java.xml out.res
+diff out.res tests/ok.res
+echo BubbleSort
+java -jar mjavac.jar unmarshal semantic examples/ast/BubbleSort.java.xml out.res
+diff out.res tests/ok.res
+echo Factorial
+java -jar mjavac.jar unmarshal semantic examples/ast/Factorial.java.xml out.res
+diff out.res tests/ok.res
+echo LinearSearch
+java -jar mjavac.jar unmarshal semantic examples/ast/LinearSearch.java.xml out.res
+diff out.res tests/ok.res
+echo LinkedList
+java -jar mjavac.jar unmarshal semantic examples/ast/LinkedList.java.xml out.res
+diff out.res tests/ok.res
+echo QuickSort
+java -jar mjavac.jar unmarshal semantic examples/ast/QuickSort.java.xml out.res
+diff out.res tests/ok.res
+echo TreeVisitor
+java -jar mjavac.jar unmarshal semantic examples/ast/TreeVisitor.java.xml out.res
+diff out.res tests/ok.res
