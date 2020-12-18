@@ -6,6 +6,7 @@ src/Lexer.java
 src/Parser.java
 output.xml
 example.ll
+out.res
 
 #
 README.org

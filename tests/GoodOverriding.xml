@@ -110,7 +110,7 @@
                     <lineNumber>106</lineNumber>
                     <returnType>
                         <ref>
-                            <id>B</id>
+                            <id>A</id>
                         </ref>
                     </returnType>
                     <name>override</name>

@@ -55,8 +55,8 @@ public class TypeCheckerVisitor implements Visitor {
         var methodReturnType = methodDecl.getSymbolTable().methodLookup(methodDecl.name()).getReturnType();
         methodDecl.ret().accept(this);
         var actualReturnType = getNodeType(methodDecl.ret());
-        if(!classMap.isValidSubclass(actualReturnType, methodReturnType)){
-            throw new SemanticException(String.format("Error in method %s: expected return type %s but got %s", methodDecl.name(), methodReturnType, actualReturnType));
+        if(!classMap.isValidSubclass(methodReturnType, actualReturnType)){
+            throw new SemanticException(String.format("Error in method %s: expected return type %s but got %s", methodDecl.name(), methodReturnType, actualReturnType)); // Point 18
         }
 
     }
@@ -83,7 +83,7 @@ public class TypeCheckerVisitor implements Visitor {
         ifStatement.cond().accept(this);
         var condType = getNodeType(ifStatement.cond());
         if(!condType.equals("boolean")){
-            throw new SemanticException("Error: If statement condition expected boolean but got " + condType );
+            throw new SemanticException("Error: If statement condition expected boolean but got " + condType ); // Point 17
         }
         ifStatement.thencase().accept(this);
         ifStatement.elsecase().accept(this);
@@ -93,7 +93,7 @@ public class TypeCheckerVisitor implements Visitor {
     public void visit(WhileStatement whileStatement) {
         whileStatement.cond().accept(this);
         if(!getNodeType(whileStatement.cond()).equals("boolean")){
-            throw new SemanticException("Error: condition is not a boolean in while statement");
+            throw new SemanticException("Error: condition is not a boolean in while statement"); // Point 17
         }
         whileStatement.body().accept(this);
     }
@@ -119,6 +119,7 @@ public class TypeCheckerVisitor implements Visitor {
 
     @Override
     public void visit(AssignArrayStatement assignArrayStatement) {
+        //Point 23
         var lvType = assignArrayStatement.getSymbolTable().varLookup(assignArrayStatement.lv()).getDecl();
         if(!lvType.equals("int[]")){
             throw new SemanticException("Error: Tried to make array access on a " + lvType);
@@ -230,6 +231,7 @@ public class TypeCheckerVisitor implements Visitor {
 
     @Override
     public void visit(ArrayAccessExpr e) {
+        //Point 22
         e.arrayExpr().accept(this);
         var arrayExprType = getNodeType(e.arrayExpr());
         if(!arrayExprType.equals("int[]")){
@@ -250,7 +252,7 @@ public class TypeCheckerVisitor implements Visitor {
         e.arrayExpr().accept(this);
         var arrayExprType = getNodeType(e.arrayExpr());
         if(!arrayExprType.equals("int[]")){
-            throw new SemanticException("Error: Array length expected int[] but got " + arrayExprType);
+            throw new SemanticException("Error: Array length expected int[] but got " + arrayExprType); // Point 13
         }
 
         addNodeType(e, "int");
@@ -261,17 +263,26 @@ public class TypeCheckerVisitor implements Visitor {
         e.ownerExpr().accept(this);
         var ownerType = getNodeType(e.ownerExpr());
 
+        if(classMap.get(ownerType) == null){ // Point 10
+            throw new SemanticException("Error: Tried to invoke a function on a simple type - " + ownerType);
+        }
+
         var methodSymbol = classMap.get(ownerType).methodLookup(e.methodId());
 
         var argTypes = methodSymbol.getArgumentTypes();
 
         var args = e.actuals();
+
+        if(argTypes.length != args.size()){
+            throw new SemanticException(String.format("Error: The method %s expected %s arguments but got %s", e.methodId(), argTypes.length, args.size()));
+        }
+
         for(int i = 0 ; i < args.size(); i++){
             var arg = args.get(i);
             arg.accept(this);
             var argType = getNodeType(arg);
             if(!classMap.isValidSubclass(argTypes[i], argType)){
-                throw new SemanticException(String.format("Error: Method %s expected %s at position %s but got %s", e.methodId(), argTypes[i], i, argType));
+                throw new SemanticException(String.format("Error: Method %s expected %s at position %s but got %s", e.methodId(), argTypes[i], i+1, argType));
             }
         }
 
