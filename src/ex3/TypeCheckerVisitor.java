@@ -21,6 +21,23 @@ public class TypeCheckerVisitor implements Visitor {
         return nodeTypes.get(node);
     }
 
+    private void checkBinaryExp(BinaryExpr e, String operatorName, String expectedType, String nodeTypeIfOk){
+        e.e1().accept(this);
+        var e1Type = getNodeType(e.e1());
+        if(!e1Type.equals(expectedType)){
+            throw new SemanticException(String.format("Error: %s operator expected %s but got %s", operatorName, expectedType, e1Type));
+        }
+
+        e.e2().accept(this);
+        var e2Type = getNodeType(e.e2());
+        if(!e2Type.equals(expectedType)){
+            throw new SemanticException(String.format("Error: %s operator expected %s but got %s", operatorName, expectedType, e2Type));
+        }
+
+        addNodeType(e, nodeTypeIfOk);
+
+    }
+
     public TypeCheckerVisitor(ClassMapping classMap){
         this.classMap = classMap;
     }
@@ -141,92 +158,27 @@ public class TypeCheckerVisitor implements Visitor {
 
     @Override
     public void visit(AndExpr e) {
-        e.e1().accept(this);
-        var e1Type = getNodeType(e.e1());
-        if(!e1Type.equals("boolean")){
-            throw new SemanticException("Error: And operator expected boolean but got " + e1Type);
-        }
-
-        e.e2().accept(this);
-        var e2Type = getNodeType(e.e2());
-        if(!e2Type.equals("boolean")){
-            throw new SemanticException("Error: And operator expected boolean but got " + e2Type);
-        }
-
-        addNodeType(e, "boolean");
-
+        checkBinaryExp(e,"And", "boolean", "boolean");
     }
 
     @Override
     public void visit(LtExpr e) {
-        e.e1().accept(this);
-        var e1Type = getNodeType(e.e1());
-        if(!e1Type.equals("int")){
-            throw new SemanticException("Error: LT operator expected int but got " + e1Type);
-        }
-
-        e.e2().accept(this);
-        var e2Type = getNodeType(e.e2());
-        if(!e2Type.equals("int")){
-            throw new SemanticException("Error: LT operator expected int but got " + e2Type);
-        }
-
-        addNodeType(e, "boolean");
-
+        checkBinaryExp(e,"LT", "int", "boolean");
     }
 
     @Override
     public void visit(AddExpr e) {
-        e.e1().accept(this);
-        var e1Type = getNodeType(e.e1());
-        if(!e1Type.equals("int")){
-            throw new SemanticException("Error: Add operator expected int but got " + e1Type);
-        }
-
-        e.e2().accept(this);
-        var e2Type = getNodeType(e.e2());
-        if(!e2Type.equals("int")){
-            throw new SemanticException("Error: Add operator expected int but got " + e2Type);
-        }
-
-        addNodeType(e, "int");
+        checkBinaryExp(e,"Add", "int", "int");
     }
 
     @Override
     public void visit(SubtractExpr e) {
-        e.e1().accept(this);
-        var e1Type = getNodeType(e.e1());
-        if(!e1Type.equals("int")){
-            throw new SemanticException("Error: Sub operator expected int but got " + e1Type);
-        }
-
-        e.e2().accept(this);
-        var e2Type = getNodeType(e.e2());
-        if(!e2Type.equals("int")){
-            throw new SemanticException("Error: Sub operator expected int but got " + e2Type);
-        }
-
-        addNodeType(e, "int");
+        checkBinaryExp(e,"Sub", "int", "int");
     }
 
     @Override
     public void visit(MultExpr e) {
-
-        e.e1().accept(this);
-        var e1Type = getNodeType(e.e1());
-        if(!e1Type.equals("int")){
-            throw new SemanticException("Error: Mult operator expected int but got " + e1Type);
-        }
-
-        e.e2().accept(this);
-        var e2Type = getNodeType(e.e2());
-        if(!e2Type.equals("int")){
-            throw new SemanticException("Error: Mult operator expected int but got " + e2Type);
-        }
-
-
-        addNodeType(e, "int");
-
+        checkBinaryExp(e,"Mult", "int", "int");
     }
 
     @Override
