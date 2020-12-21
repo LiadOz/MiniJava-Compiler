@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "#######################CLASS TESTS#########################"
 echo GoodOverriding
 java -jar mjavac.jar unmarshal semantic tests/GoodOverriding.xml out.res
 diff out.res tests/ok.res
@@ -68,3 +69,29 @@ diff out.res tests/ok.res
 echo TreeVisitor
 java -jar mjavac.jar unmarshal semantic examples/ast/TreeVisitor.java.xml out.res
 diff out.res tests/ok.res
+
+echo "#######################TYPE TESTS#########################"
+
+echo InvalidArrayAccess
+java -jar mjavac.jar unmarshal semantic tests/InvalidArrayAccess.java.xml out.res
+diff out.res tests/fail.res
+
+echo InvalidLessThan
+java -jar mjavac.jar unmarshal semantic tests/InvalidLessThan.java.xml out.res
+diff out.res tests/fail.res
+
+echo InvalidIfCondition
+java -jar mjavac.jar unmarshal semantic tests/InvalidIfCondition.java.xml out.res
+diff out.res tests/fail.res
+
+echo InvalidSysout
+java -jar mjavac.jar unmarshal semantic tests/InvalidSysout.java.xml out.res
+diff out.res tests/fail.res
+
+echo InvalidArgumentType
+java -jar mjavac.jar unmarshal semantic tests/InvalidArgumentType.java.xml out.res
+diff out.res tests/fail.res
+
+echo InvalidArrayLength
+java -jar mjavac.jar unmarshal semantic tests/InvalidArrayLength.java.xml out.res
+diff out.res tests/fail.res
