@@ -32,15 +32,11 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(MainClass mainClass) {
-//    	mainClass.argsName();
 		mainClass.mainStatement().accept(this);
 	}
 
 	@Override
 	public void visit(MethodDecl methodDecl) {
-//    	for (var formal : methodDecl.formals()) {
-//            formal.accept(this);
-//        }
 		for (var varDecl : methodDecl.vardecls()) {
 			varDecl.accept(this);
 		}
@@ -52,7 +48,6 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(FormalArg formalArg) {
-//    	formalArg.name();
 	}
 
 	@Override
@@ -76,7 +71,6 @@ public class VariableInitVisitor implements Visitor {
 		elseLat.copy(lattice);
 		ifStatement.cond().accept(this);
 		lattice = thenLat;
-		lattice.assign("y");
 		ifStatement.thencase().accept(this);
 		lattice = elseLat;
 		ifStatement.elsecase().accept(this);
