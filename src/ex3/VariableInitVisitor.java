@@ -148,7 +148,9 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(MethodCallExpr e) {
-
+		for (Expr arg : e.actuals()) {
+			arg.accept(this);
+		}
 	}
 
 	@Override
