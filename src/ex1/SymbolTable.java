@@ -26,11 +26,12 @@ public class SymbolTable {
 
     public void addVar(String id, Symbol s){
         boolean inside = false;
+        Symbol symbolInside = null;
         try {
-            varLookup(id);
+            symbolInside = varLookup(id);
             inside = true;
         } catch (SemanticException e) { }
-        if (inside) {
+        if (inside && symbolInside.getKind() == s.getKind()) {
             throw new SemanticException(id + " already in symbol table"); // Points 4, 24
         }
         varEntries.put(id, s);

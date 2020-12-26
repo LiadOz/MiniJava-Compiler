@@ -17,8 +17,8 @@ public class SemanticChecker {
             program.accept(new TypeCheckerVisitor(classMap));
             program.accept(new VariableInitVisitor(classMap));
             return "OK\n";
-        } catch (SemanticException e) {
-            System.out.println(e.getMessage()); // for checking if cause is correct
+        } catch (Exception e) {
+            // System.out.println(e.getMessage()); // for checking if cause is correct
             return "ERROR\n";
         }
     }
