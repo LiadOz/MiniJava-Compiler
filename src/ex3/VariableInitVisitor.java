@@ -151,6 +151,7 @@ public class VariableInitVisitor implements Visitor {
 		for (Expr arg : e.actuals()) {
 			arg.accept(this);
 		}
+		e.ownerExpr().accept(this);
 	}
 
 	@Override
