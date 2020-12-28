@@ -15,7 +15,7 @@ public class SemanticChecker {
             program.accept(symbolTableBuilder);
             program.accept(new ClassCheckerVisitor(classMap));
             program.accept(new TypeCheckerVisitor(classMap));
-            program.accept(new VariableInitVisitor(classMap));
+            program.accept(new VariableInitVisitor());
             return "OK\n";
         } catch (Exception e) {
             // System.out.println(e.getMessage()); // for checking if cause is correct
