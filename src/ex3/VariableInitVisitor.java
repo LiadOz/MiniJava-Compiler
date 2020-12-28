@@ -1,18 +1,20 @@
 package ex3;
 
 import ast.*;
-import ex1.ClassMapping;
 
 public class VariableInitVisitor implements Visitor {
 
 	// Point 15 and the appendix at the end of the exercise
 
-	private final ClassMapping classMap;
 	private Lattice lattice;
 
-	public VariableInitVisitor(ClassMapping classMap) {
-		this.classMap = classMap;
+
+	public VariableInitVisitor() {
 		this.lattice = new Lattice();
+	}
+
+	public VariableInitVisitor(Lattice l){
+		this.lattice = l;
 	}
 
 	@Override
@@ -26,17 +28,23 @@ public class VariableInitVisitor implements Visitor {
 	@Override
 	public void visit(ClassDecl classDecl) {
 		for (var methodDecl : classDecl.methoddecls()) {
+			lattice = new Lattice();
 			methodDecl.accept(this);
 		}
 	}
 
 	@Override
 	public void visit(MainClass mainClass) {
+		lattice = new Lattice();
 		mainClass.mainStatement().accept(this);
 	}
 
 	@Override
 	public void visit(MethodDecl methodDecl) {
+		for(var formal: methodDecl.formals()){
+			formal.accept(this);
+		}
+
 		for (var varDecl : methodDecl.vardecls()) {
 			varDecl.accept(this);
 		}
@@ -48,6 +56,7 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(FormalArg formalArg) {
+		lattice.assign(formalArg.name());
 	}
 
 	@Override
@@ -64,17 +73,18 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(IfStatement ifStatement) {
-		Lattice thenLat, elseLat;
-		thenLat = new Lattice();
-		elseLat = new Lattice();
+		var thenLat = new Lattice();
+		var elseLat = new Lattice();
 		thenLat.copy(lattice);
 		elseLat.copy(lattice);
+		var thenVisitor = new VariableInitVisitor(thenLat);
+		var elseVisitor = new VariableInitVisitor(elseLat);
 		ifStatement.cond().accept(this);
-		lattice = thenLat;
-		ifStatement.thencase().accept(this);
-		lattice = elseLat;
-		ifStatement.elsecase().accept(this);
-		lattice.join(thenLat);
+		ifStatement.thencase().accept(thenVisitor);
+		ifStatement.elsecase().accept(elseVisitor);
+		lattice = elseVisitor.lattice;
+		lattice.join(thenVisitor.lattice);
+
 	}
 
 	@Override
@@ -94,16 +104,16 @@ public class VariableInitVisitor implements Visitor {
 	@Override
 	public void visit(AssignStatement assignStatement) {
 		assignStatement.rv().accept(this);
-
 		lattice.assign(assignStatement.lv());
 	}
 
 	@Override
 	public void visit(AssignArrayStatement assignArrayStatement) {
+		if(!lattice.isInit(assignArrayStatement.lv())){
+			throw new SemanticException(String.format("Error: variable %s may not have been initialized", assignArrayStatement.lv()));
+		}
 		assignArrayStatement.rv().accept(this);
 		assignArrayStatement.index().accept(this);
-
-		lattice.assign(assignArrayStatement.lv());
 	}
 
 	@Override
@@ -138,12 +148,13 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(ArrayAccessExpr e) {
+		e.arrayExpr().accept(this);
 		e.indexExpr().accept(this);
 	}
 
 	@Override
 	public void visit(ArrayLengthExpr e) {
-
+		e.arrayExpr().accept(this);
 	}
 
 	@Override
@@ -184,7 +195,7 @@ public class VariableInitVisitor implements Visitor {
 
 	@Override
 	public void visit(NewIntArrayExpr e) {
-
+		e.lengthExpr().accept(this);
 	}
 
 	@Override
