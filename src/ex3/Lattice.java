@@ -39,7 +39,7 @@ public class Lattice {
     }
 
     public boolean isInit(String varID) {
-        return varMap.containsKey(varID) && varMap.get(varID) == initKind.tt;
+        return !varMap.containsKey(varID) || varMap.get(varID) == initKind.tt;
     }
 
     public void copy(Lattice lat) {
