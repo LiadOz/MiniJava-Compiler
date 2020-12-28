@@ -2,12 +2,14 @@ package ex3;
 
 import ast.*;
 import ex1.ClassMapping;
+import ex1.SymbolKind;
 
 public class VariableInitVisitor implements Visitor {
 
 	// Point 15 and the appendix at the end of the exercise
 
 	private Lattice lattice;
+	private Lattice fieldsLattice = new Lattice();
 
 	public VariableInitVisitor() {
 		this.lattice = new Lattice();
@@ -20,6 +22,11 @@ public class VariableInitVisitor implements Visitor {
 	@Override
 	public void visit(Program program) {
 		program.mainClass().accept(this);
+		for (var classdecl : program.classDecls()){
+			for ( var field : classdecl.fields()){
+				fieldsLattice.assign(field.name());
+			}
+		}
 		for (ClassDecl classdecl : program.classDecls()) {
 			classdecl.accept(this);
 		}
@@ -29,6 +36,7 @@ public class VariableInitVisitor implements Visitor {
 	public void visit(ClassDecl classDecl) {
 		for (var methodDecl : classDecl.methoddecls()) {
 			lattice = new Lattice();
+			lattice.copy(fieldsLattice);
 			methodDecl.accept(this);
 		}
 	}
