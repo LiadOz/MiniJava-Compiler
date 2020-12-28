@@ -1,8 +1,6 @@
 package ex3;
 
 import ast.*;
-import ex1.ClassMapping;
-import ex1.SymbolKind;
 
 public class VariableInitVisitor implements Visitor {
 
