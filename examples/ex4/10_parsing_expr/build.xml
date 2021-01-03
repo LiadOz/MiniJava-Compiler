@@ -19,7 +19,8 @@
     <target name="generate">
         <jflex file="${jflex}/Scanner.jflex" destdir="${src}" />
         <cup srcfile="${cup}/Parser.cup"     destdir="${src}"
-             parser="Parser"                 interface="true" locations="false" />
+             parser="Parser"                 interface="true" locations="false" 
+             dump_states="true" dump_grammar="true" dump_tables="true" />
     </target>
 
     <target name="compile" depends="init,generate"
@@ -34,7 +35,7 @@
 
     <target name="dist" depends="compile"
             description="generate the distribution">
-        <jar jarfile="mjavac.jar" basedir="${build}">
+        <jar jarfile="scanner.jar" basedir="${build}">
             <manifest>
                 <attribute name="Main-Class" value="Main"/>
                 <attribute name="Class-Path" value="${tools}/java-cup-11b-runtime.jar ${tools}/java-cup-11b.jar ${tools}/jakarta.xml.bind-api-2.3.3.jar ${tools}/jaxb-impl-2.3.3.jar ${tools}/jakarta.activation-api-1.2.2.jar ${tools}/jaxb-jxc-2.3.3.jar"/>
@@ -44,10 +45,9 @@
 
     <target name="clean"
             description="clean up">
-        <delete file="mjavac.jar"/>
+        <delete file="parser.jar"/>
         <delete dir="${build}"/>
         <delete file="${src}/Lexer.java"/>
         <delete file="${src}/Parser.java"/>
-        <delete file="${src}/sym.java"/>
     </target>
 </project>

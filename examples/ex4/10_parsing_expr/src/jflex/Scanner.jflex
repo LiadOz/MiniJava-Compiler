@@ -63,6 +63,10 @@ import java_cup.runtime.*;
 /***********************/
 /* MACRO DECALARATIONS */
 /***********************/
+LineTerminator	= \r|\n|\r\n
+WhiteSpace		= [\t ] | {LineTerminator}
+INTEGER			= 0 | [1-9][0-9]*
+ID				= [a-zA-Z]
 
 /******************************/
 /* DOLAR DOLAR - DON'T TOUCH! */
@@ -81,6 +85,16 @@ import java_cup.runtime.*;
 /**************************************************************/
 
 <YYINITIAL> {
-"public"            { return symbol(sym.PUBLIC); }
-<<EOF>>				{ return symbol(sym.EOF); }
+"max"		   { return symbol(sym.MAX); }
+","			   { return symbol(sym.COMMA); }
+"+"            { return symbol(sym.PLUS); }
+"-"            { return symbol(sym.MINUS); }
+"*"            { return symbol(sym.MULT); }
+"/"            { return symbol(sym.DIV); }
+"("            { return symbol(sym.LPAREN); }
+")"            { return symbol(sym.RPAREN); }
+{ID}		   { return symbol(sym.ID, new String(yytext())); }
+{INTEGER}      { return symbol(sym.NUMBER, Integer.parseInt(yytext())); }
+{WhiteSpace}   { /* do nothing */ }
+<<EOF>>		   { return symbol(sym.EOF); }
 }

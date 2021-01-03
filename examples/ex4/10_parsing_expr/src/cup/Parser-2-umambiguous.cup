@@ -1,0 +1,108 @@
+/*************/
+/* IMPORTS */
+/*************/
+
+import java_cup.runtime.*;
+import ast.*;
+import java.util.List;
+import java.util.LinkedList;
+
+parser code
+{:
+	public Lexer lexer;
+
+	public Parser(Lexer lexer)
+	{
+		super(lexer);
+		this.lexer = lexer;
+	}
+	public void report_error(String message, Object info)
+	{
+    System.out.print("Syntax error at line " + lexer.getLine() + " of input\n");
+		// System.out.print("ERROR >> ");
+		// System.out.print("[");
+		// System.out.print(lexer.getLine());
+		// System.out.print(":");
+		// System.out.print(lexer.getCharPos());
+		// System.out.print("] ");
+		System.exit(1);
+	}
+:}
+
+/************************/
+/* CUSTOMIZE CUP PARSER */
+/************************/
+scan with
+{:
+	Symbol s;
+	s = lexer.next_token();
+	// System.out.print(s.sym);
+	// System.out.print("[");
+	// System.out.print(lexer.getLine());
+	// System.out.print(":");
+	// System.out.print(lexer.getCharPos());
+	// System.out.print("] ");
+	// System.out.print(sym.terminalNames[s.sym]);
+	// if (s.value != null)
+	// {
+	//	System.out.print("( ");
+	//	System.out.print(s.value);
+	//	System.out.print(" )");
+	// }
+	// System.out.print("\n");
+	return s;
+:};
+
+/*************/
+/* TERMINALS */
+/*************/
+terminal PLUS, MINUS, MULT, DIV;
+terminal LPAREN, RPAREN;
+terminal MAX;
+terminal COMMA;
+terminal int NUMBER;
+terminal String ID;
+
+/*****************/
+/* NON TERMINALS */
+/*****************/
+non terminal Expr expr;
+non terminal Expr term;
+non terminal Expr factor;
+
+non terminal LinkedList<Expr> commaexprlist;
+
+/***********************/
+/* OPERATOR PRECEDENCE */
+/***********************/
+/* TODO will be completed next recitation */
+
+/************************/
+/* INITIAL NON TERMINAL */
+/************************/
+start with expr;
+
+/********************/
+/* PRODUCTION RULES */
+/********************/
+
+expr ::= expr:e1 PLUS term:e2 		{: RESULT = new AddExpr(e1, e2); :}
+         | expr:e1 MINUS term:e2	{: RESULT = new SubtractExpr(e1, e2); :}
+         | term:e					{: RESULT = e; :}
+;
+
+term ::= term:e1 MULT factor:e2		{: RESULT = new MultExpr(e1, e2); :}
+         | term:e1 DIV factor:e2    {: RESULT = new DivExpr(e1, e2); :}
+         | factor:e 				{: RESULT = e; :}		
+;
+
+factor ::= LPAREN expr:e RPAREN		{: RESULT = e; :}
+         | NUMBER:n					{: RESULT = new IntegerLiteralExpr(n); :}
+         | MAX LPAREN expr:e commaexprlist:el RPAREN {: el.addFirst(e); RESULT = new MaxExpr(el); :}
+;
+
+commaexprlist ::= COMMA expr: e commaexprlist:el {: el.addFirst(e); RESULT = el; :}
+		 | /* empty */           	{: RESULT = new LinkedList<Expr>(); :}
+
+;
+		   
