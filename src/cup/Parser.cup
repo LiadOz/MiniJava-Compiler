@@ -63,12 +63,75 @@ scan with
 /*************/
 /* TERMINALS */
 /*************/
+terminal String IDENTIFIER;
+
+//Literals
+terminal Integer INTEGER_LITERAL;
+terminal TRUE;
+terminal FALSE;
+// -------
+
+//Meta language
+terminal LBRACE;
+terminal RBRACE;
+terminal LBRACKET;
+terminal RBRACKET;
+terminal LPAREN;
+terminal RPAREN;
+terminal SEMICOLON;
+terminal COMMA;
+terminal EQUALS;
+terminal DOT;
+terminal EXCLAMATION;
+//-----
+
+// Binary Operators
+
+terminal LESSTHAN;
+terminal AND;
+terminal PLUS;
+terminal MINUS;
+terminal MULT;
+
+//-----
+
+//Class related
+terminal CLASS;
 terminal PUBLIC;
+terminal STATIC;
+terminal VOID;
+terminal MAIN;
+terminal NEW;
+terminal THIS;
+terminal EXTENDS;
+terminal STRING;
+
+// ----
+
+// Control Flow
+terminal IF;
+terminal ELSE;
+terminal WHILE;
+
+// ---
+
+// Types and methods
+terminal RETURN;
+terminal BOOLEAN;
+terminal INTEGER;
+terminal PRINT;
+terminal LENGTH;
+
+// ---
+
+
+
 
 /*****************/
 /* NON TERMINALS */
 /*****************/
 non terminal prog;
+non terminal MainClass MainClass;
 
 /***********************/
 /* OPERATOR PRECEDENCE */
