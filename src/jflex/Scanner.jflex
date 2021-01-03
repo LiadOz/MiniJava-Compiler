@@ -125,6 +125,7 @@ false 					{return symbol(sym.FALSE);}
 &&						{return symbol(sym.AND);}
 \+						{return symbol(sym.PLUS);}
 \*						{return symbol(sym.MULT);}
+\-                      {return symbol(sym.MINUS);}
 
 
 // Class Related

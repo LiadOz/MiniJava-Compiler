@@ -130,12 +130,30 @@ terminal LENGTH;
 /*****************/
 /* NON TERMINALS */
 /*****************/
-non terminal prog;
+non terminal Program prog;
 non terminal MainClass MainClass;
+non terminal List<ClassDecl> ClassDecl;
+non terminal List<VarDecl> VarDecl;
+non terminal List<MethodDecl> MethodDecl;
+non terminal AstType type;
+non terminal List<FormalArg> Formals;
+non terminal List<FormalArg> OtherFormals;
+non terminal List<Statement> Statements;
+non terminal Expr Expression;
+non terminal List<Expr> ExpressionList;
+non terminal List<Expr> OtherExpressions;
+
+
+non terminal Statement statement;
 
 /***********************/
 /* OPERATOR PRECEDENCE */
 /***********************/
+precedence left PLUS, MINUS;
+precedence left MULT;
+precedence left LESSTHAN, AND;
+precedence left EXCLAMATION;
+precedence left DOT;
 
 /************************/
 /* INITIAL NON TERMINAL */
@@ -146,4 +164,226 @@ start with prog;
 /* PRODUCTION RULES */
 /********************/
 
-prog            ::=     ;
+prog  ::=   MainClass:m ClassDecl:c
+            {:
+               RESULT = new Program(m, c);
+            :};
+
+MainClass ::= CLASS IDENTIFIER:i1 LBRACE PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET IDENTIFIER:i2 RPAREN LBRACE statement:s RBRACE RBRACE
+			{:
+				RESULT = new MainClass(i1, i2, s);
+			:};
+
+ClassDecl ::= ClassDecl:cl CLASS IDENTIFIER:i LBRACE VarDecl:v MethodDecl:m RBRACE
+				{:
+				    if(cl==null) cl = new LinkedList<ClassDecl>();
+				    cl.add(new ClassDecl(i,null,v,m));
+					RESULT = cl;
+				:}
+			| ClassDecl:cl CLASS IDENTIFIER:i1 EXTENDS IDENTIFIER:i2 LBRACE VarDecl:v MethodDecl:m RBRACE
+				{:
+					if(cl==null) cl = new LinkedList<ClassDecl>();
+                    cl.add(new ClassDecl(i1,i2,v,m));
+                    RESULT = cl;
+				:}
+			|	{:
+			  		RESULT = new LinkedList<ClassDecl>();
+				:};
+
+
+VarDecl ::= VarDecl:vl type:t IDENTIFIER:i SEMICOLON
+				{:
+					VarDecl newVar = new VarDecl(t, i, lexer.getLine());
+					if (vl == null) vl = new LinkedList<VarDecl>();
+					vl.add(newVar);
+					RESULT = vl;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<VarDecl>();
+				:};
+
+
+
+
+MethodDecl ::=	MethodDecl:ml PUBLIC type:t IDENTIFIER:i LPAREN Formals:f RPAREN LBRACE VarDecl:vl Statements:b RETURN Expression:e SEMICOLON RBRACE
+				{:
+					if (ml == null) ml = new LinkedList<MethodDecl>();
+					MethodDecl m = new MethodDecl(t, i, f, vl, b, e, lexer.getLine());
+					ml.add(m);
+					RESULT = ml;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<MethodDecl>();
+				:};
+
+
+Formals ::= type:t IDENTIFIER:i OtherFormals:others
+				{:
+					LinkedList<FormalArg> fl = new LinkedList<>();
+					fl.add(new FormalArg(t, i, lexer.getLine()));
+					if (others != null && others.size() > 0) {
+						for (var otherFormal:others) {
+							fl.add(otherFormal);
+						}
+					}
+					RESULT = fl;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<FormalArg>();
+				:};
+
+
+OtherFormals ::= OtherFormals:fr COMMA type:t IDENTIFIER:i
+				{:
+					if (fr == null) fr = new LinkedList<FormalArg>();
+					fr.add(new FormalArg(t, i, lexer.getLine()));
+					RESULT = fr;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<FormalArg>();
+				:};
+
+
+type ::= INTEGER LBRACKET RBRACKET
+			{:
+				RESULT = new IntArrayAstType();
+			:}
+		|
+		  BOOLEAN
+		  	{:
+		  		RESULT = new BoolAstType();
+		  	:}
+		|
+		  INTEGER
+		  	{:
+		  		RESULT = new IntAstType();
+		  	:}
+		|
+		  IDENTIFIER:i
+		  	{:
+		  		RESULT = new RefType(i);
+		  	:};
+		  	
+
+Statements ::= statement:s Statements:sl1
+					{:
+						LinkedList<Statement> sl2 = new LinkedList<>();
+						sl2.add(s);
+						if (sl1 != null && sl1.size() > 0) {
+							for (var statement: sl1) {
+								sl2.add(statement);
+							}
+						}
+						RESULT = sl2;
+					:}
+				|
+					{:
+						RESULT = new LinkedList<Statement>();
+					:};
+
+statement ::= LBRACE Statements:sl RBRACE
+				{:
+					BlockStatement b = new BlockStatement(sl);
+					RESULT = b;
+				:}
+			|
+			  IF LPAREN Expression:e RPAREN statement:s1 ELSE statement:s2
+			  {:
+			  		IfStatement if_expr = new IfStatement(e,s1,s2);
+			  		RESULT = if_expr;
+			  :}
+			|
+			  WHILE LPAREN Expression:e RPAREN statement:s
+			  {:
+					WhileStatement while_expr = new WhileStatement(e, s);
+					RESULT = while_expr;
+			  :}
+			|
+			  PRINT LPAREN Expression:e RPAREN SEMICOLON
+			  {:
+			  		var print_expr = new SysoutStatement(e);
+			  		RESULT = print_expr;
+			  :}
+
+			|
+			  IDENTIFIER:i EQUALS Expression:e SEMICOLON
+			  {:
+			  		var assignment = new AssignStatement(i, e);
+			  		RESULT = assignment;
+			  :}
+			|
+			  IDENTIFIER:i LBRACKET Expression:e1 RBRACKET EQUALS Expression:e2 SEMICOLON
+			  {:
+			  		var ArrayAssignment = new AssignArrayStatement(i, e1, e2);
+			  		RESULT = ArrayAssignment;
+			  :};
+
+
+Expression ::= Expression:e1 AND Expression:e2
+			{: RESULT = new AndExpr(e1, e2); :}
+		| Expression:e1 PLUS Expression:e2
+			{: RESULT = new AddExpr(e1, e2); :}
+		| Expression:e1 MINUS Expression:e2
+			{: RESULT = new SubtractExpr(e1, e2); :}
+		| Expression:e1 MULT Expression:e2
+			{: RESULT = new MultExpr(e1, e2); :}
+		| Expression:e1 LESSTHAN Expression:e2
+			{: RESULT = new LtExpr(e1, e2); :}
+		| Expression:e1 LBRACKET Expression:e2 RBRACKET
+			{: RESULT = new ArrayAccessExpr(e1, e2); :}
+		| Expression:e1 DOT LENGTH
+			{: RESULT = new ArrayLengthExpr(e1); :}
+		| Expression:e1 DOT IDENTIFIER:i LPAREN ExpressionList:el RPAREN
+			{: RESULT = new MethodCallExpr(e1, i, el); :}
+		| INTEGER_LITERAL:i
+			{: RESULT = new IntegerLiteralExpr(i); :}
+		| TRUE
+			{: RESULT = new TrueExpr(); :}
+		| FALSE
+			{: RESULT = new FalseExpr(); :}
+		| IDENTIFIER:i
+			{: RESULT = new IdentifierExpr(i); :}
+		| THIS
+			{: RESULT = new ThisExpr(); :}
+		| NEW INTEGER LBRACKET Expression:e RBRACKET
+			{: RESULT = new NewIntArrayExpr(e); :}
+		| NEW IDENTIFIER:i LPAREN RPAREN
+			{: RESULT = new NewObjectExpr(i); :}
+		| EXCLAMATION Expression:e
+			{: RESULT = new NotExpr(e); :}
+		| LPAREN Expression:e RPAREN
+			{: RESULT = e; :};
+
+
+ExpressionList::= Expression:e OtherExpressions:others
+				{:
+					var expressions = new LinkedList<Expr>();
+					expressions.add(e);
+					if (others != null && others.size() > 0) {
+						for (var otherExp : others){
+							expressions.add(otherExp);
+						}
+					}
+					RESULT = expressions;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<Expr>();
+				:};
+
+
+OtherExpressions ::= OtherExpressions:others COMMA Expression:e
+				{:
+					if (others == null) others = new LinkedList<Expr>();
+					others.add(e);
+					RESULT = others;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<Expr>();
+				:}
+		;

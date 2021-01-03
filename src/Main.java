@@ -1,11 +1,15 @@
-import ast.*;
+import ast.AstPrintVisitor;
+import ast.AstXMLSerializer;
+import ast.Program;
 import ex1.RefactorFactory;
 import ex1.RefactorProgram;
-import ex2.CompileVisitor;
 import ex2.ProgramCompiler;
 import ex3.SemanticChecker;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.PrintWriter;
 
 public class Main {
     public static void main(String[] args) {
@@ -18,7 +22,9 @@ public class Main {
             Program prog;
 
             if (inputMethod.equals("parse")) {
-                throw new UnsupportedOperationException("TODO - Ex. 4");
+                FileReader reader = new FileReader(new File(filename));
+                Parser parser = new Parser(new Lexer(reader));
+                prog = (Program)parser.parse().value;
             } else if (inputMethod.equals("unmarshal")) {
                 AstXMLSerializer xmlSerializer = new AstXMLSerializer();
                 prog = xmlSerializer.deserialize(new File(filename));
