@@ -68,8 +68,9 @@ line_terminator	= \r|\n|\r\n
 whitespace		= [\t ] | {line_terminator}
 integer		    = 0 | [1-9][0-9]*
 ID				= [a-zA-Z][a-zA-Z0-9_]*
-block_comment = "/*" ~"*/"
-line_comment = "//"~\n
+line_comment = "//"~{line_terminator}
+
+%state BLOCK_COMMENT
 
 
 /******************************/
@@ -98,7 +99,7 @@ line_comment = "//"~\n
 
 <YYINITIAL> {
 
-{block_comment}			{}
+"/*"			        {yybegin(BLOCK_COMMENT);}
 {line_comment}			{}
 
 // Literals
@@ -154,4 +155,9 @@ length					{return symbol(sym.LENGTH);}
 
 {ID}                    {return symbol(sym.IDENTIFIER, yytext());}
 {whitespace}            {}
+}
+
+<BLOCK_COMMENT> {
+    "*/"     {yybegin(YYINITIAL);}
+    [^"*/"]  {}
 }

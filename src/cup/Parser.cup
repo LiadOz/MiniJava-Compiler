@@ -169,49 +169,39 @@ prog  ::=   MainClass:m ClassDecl:c
                RESULT = new Program(m, c);
             :};
 
-MainClass ::= CLASS IDENTIFIER:i1 LBRACE PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET IDENTIFIER:i2 RPAREN LBRACE statement:s RBRACE RBRACE
+MainClass ::= CLASS IDENTIFIER:className LBRACE PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET IDENTIFIER:argsName RPAREN LBRACE statement:body RBRACE RBRACE
 			{:
-				RESULT = new MainClass(i1, i2, s);
+				RESULT = new MainClass(className, argsName, body);
 			:};
 
-ClassDecl ::= ClassDecl:cl CLASS IDENTIFIER:i LBRACE VarDecl:v MethodDecl:m RBRACE
+ClassDecl ::= ClassDecl:classes CLASS IDENTIFIER:className LBRACE VarDecl:vars MethodDecl:methods RBRACE
 				{:
-				    if(cl==null) cl = new LinkedList<ClassDecl>();
-				    cl.add(new ClassDecl(i,null,v,m));
-					RESULT = cl;
+				    if(classes == null) classes  = new LinkedList<ClassDecl>();
+				    classes .add(new ClassDecl(className,null,vars,methods));
+					RESULT = classes;
 				:}
-			| ClassDecl:cl CLASS IDENTIFIER:i1 EXTENDS IDENTIFIER:i2 LBRACE VarDecl:v MethodDecl:m RBRACE
+			| ClassDecl:classes CLASS IDENTIFIER:className EXTENDS IDENTIFIER:superName LBRACE VarDecl:vars MethodDecl:methods RBRACE
 				{:
-					if(cl==null) cl = new LinkedList<ClassDecl>();
-                    cl.add(new ClassDecl(i1,i2,v,m));
-                    RESULT = cl;
+					if(classes==null) classes = new LinkedList<ClassDecl>();
+                    classes.add(new ClassDecl(className,superName,vars,methods));
+                    RESULT = classes;
 				:}
 			|	{:
 			  		RESULT = new LinkedList<ClassDecl>();
 				:};
 
 
-VarDecl ::= VarDecl:vl type:t IDENTIFIER:i SEMICOLON
+
+
+
+
+
+MethodDecl ::=	MethodDecl:methods PUBLIC type:returnType IDENTIFIER:methodName LPAREN Formals:formalArgs RPAREN LBRACE VarDecl:vars Statements:body RETURN Expression:returnedExp SEMICOLON RBRACE
 				{:
-					VarDecl newVar = new VarDecl(t, i, lexer.getLine());
-					if (vl == null) vl = new LinkedList<VarDecl>();
-					vl.add(newVar);
-					RESULT = vl;
-				:}
-			|
-				{:
-					RESULT = new LinkedList<VarDecl>();
-				:};
-
-
-
-
-MethodDecl ::=	MethodDecl:ml PUBLIC type:t IDENTIFIER:i LPAREN Formals:f RPAREN LBRACE VarDecl:vl Statements:b RETURN Expression:e SEMICOLON RBRACE
-				{:
-					if (ml == null) ml = new LinkedList<MethodDecl>();
-					MethodDecl m = new MethodDecl(t, i, f, vl, b, e, lexer.getLine());
-					ml.add(m);
-					RESULT = ml;
+					if (methods == null) methods = new LinkedList<MethodDecl>();
+					MethodDecl m = new MethodDecl(returnType, methodName, formalArgs, vars, body, returnedExp, lexer.getLine());
+					methods.add(m);
+					RESULT = methods;
 				:}
 			|
 				{:
@@ -219,10 +209,10 @@ MethodDecl ::=	MethodDecl:ml PUBLIC type:t IDENTIFIER:i LPAREN Formals:f RPAREN 
 				:};
 
 
-Formals ::= type:t IDENTIFIER:i OtherFormals:others
+Formals ::= type:type IDENTIFIER:name OtherFormals:others
 				{:
 					LinkedList<FormalArg> fl = new LinkedList<>();
-					fl.add(new FormalArg(t, i, lexer.getLine()));
+					fl.add(new FormalArg(type, name, lexer.getLine()));
 					if (others != null && others.size() > 0) {
 						for (var otherFormal:others) {
 							fl.add(otherFormal);
@@ -236,15 +226,27 @@ Formals ::= type:t IDENTIFIER:i OtherFormals:others
 				:};
 
 
-OtherFormals ::= OtherFormals:fr COMMA type:t IDENTIFIER:i
+OtherFormals ::= OtherFormals:others COMMA type:type IDENTIFIER:name
 				{:
-					if (fr == null) fr = new LinkedList<FormalArg>();
-					fr.add(new FormalArg(t, i, lexer.getLine()));
-					RESULT = fr;
+					if (others == null) others = new LinkedList<FormalArg>();
+					others.add(new FormalArg(type, name, lexer.getLine()));
+					RESULT = others;
 				:}
 			|
 				{:
 					RESULT = new LinkedList<FormalArg>();
+				:};
+
+VarDecl ::= VarDecl:vars type:varType IDENTIFIER:varName SEMICOLON
+				{:
+					VarDecl newVar = new VarDecl(varType, varName, lexer.getLine());
+					if (vars == null) vars = new LinkedList<VarDecl>();
+					vars.add(newVar);
+					RESULT = vars;
+				:}
+			|
+				{:
+					RESULT = new LinkedList<VarDecl>();
 				:};
 
 
@@ -263,62 +265,62 @@ type ::= INTEGER LBRACKET RBRACKET
 		  		RESULT = new IntAstType();
 		  	:}
 		|
-		  IDENTIFIER:i
+		  IDENTIFIER:className
 		  	{:
-		  		RESULT = new RefType(i);
+		  		RESULT = new RefType(className);
 		  	:};
 		  	
 
-Statements ::= statement:s Statements:sl1
+Statements ::= statement:newStatement Statements:existingStatements
 					{:
-						LinkedList<Statement> sl2 = new LinkedList<>();
-						sl2.add(s);
-						if (sl1 != null && sl1.size() > 0) {
-							for (var statement: sl1) {
-								sl2.add(statement);
+						LinkedList<Statement> updatedStatements = new LinkedList<>();
+						updatedStatements.add(newStatement);
+						if (existingStatements != null && existingStatements.size() > 0) {
+							for (var statement: existingStatements) {
+								updatedStatements.add(statement);
 							}
 						}
-						RESULT = sl2;
+						RESULT = updatedStatements;
 					:}
 				|
 					{:
 						RESULT = new LinkedList<Statement>();
 					:};
 
-statement ::= LBRACE Statements:sl RBRACE
+statement ::= LBRACE Statements:statementList RBRACE
 				{:
-					BlockStatement b = new BlockStatement(sl);
+					BlockStatement b = new BlockStatement(statementList);
 					RESULT = b;
 				:}
 			|
-			  IF LPAREN Expression:e RPAREN statement:s1 ELSE statement:s2
+			  IF LPAREN Expression:cond RPAREN statement:thenCase ELSE statement:elseCase
 			  {:
-			  		IfStatement if_expr = new IfStatement(e,s1,s2);
+			  		IfStatement if_expr = new IfStatement(cond,thenCase,elseCase);
 			  		RESULT = if_expr;
 			  :}
 			|
-			  WHILE LPAREN Expression:e RPAREN statement:s
+			  WHILE LPAREN Expression:cond RPAREN statement:body
 			  {:
-					WhileStatement while_expr = new WhileStatement(e, s);
+					WhileStatement while_expr = new WhileStatement(cond, body);
 					RESULT = while_expr;
 			  :}
 			|
-			  PRINT LPAREN Expression:e RPAREN SEMICOLON
+			  PRINT LPAREN Expression:arg RPAREN SEMICOLON
 			  {:
-			  		var print_expr = new SysoutStatement(e);
+			  		var print_expr = new SysoutStatement(arg);
 			  		RESULT = print_expr;
 			  :}
 
 			|
-			  IDENTIFIER:i EQUALS Expression:e SEMICOLON
+			  IDENTIFIER:lv EQUALS Expression:rv SEMICOLON
 			  {:
-			  		var assignment = new AssignStatement(i, e);
+			  		var assignment = new AssignStatement(lv, rv);
 			  		RESULT = assignment;
 			  :}
 			|
-			  IDENTIFIER:i LBRACKET Expression:e1 RBRACKET EQUALS Expression:e2 SEMICOLON
+			  IDENTIFIER:arrayName LBRACKET Expression:indexExpr RBRACKET EQUALS Expression:rv SEMICOLON
 			  {:
-			  		var ArrayAssignment = new AssignArrayStatement(i, e1, e2);
+			  		var ArrayAssignment = new AssignArrayStatement(arrayName, indexExpr, rv);
 			  		RESULT = ArrayAssignment;
 			  :};
 
@@ -333,14 +335,14 @@ Expression ::= Expression:e1 AND Expression:e2
 			{: RESULT = new MultExpr(e1, e2); :}
 		| Expression:e1 LESSTHAN Expression:e2
 			{: RESULT = new LtExpr(e1, e2); :}
-		| Expression:e1 LBRACKET Expression:e2 RBRACKET
-			{: RESULT = new ArrayAccessExpr(e1, e2); :}
-		| Expression:e1 DOT LENGTH
-			{: RESULT = new ArrayLengthExpr(e1); :}
-		| Expression:e1 DOT IDENTIFIER:i LPAREN ExpressionList:el RPAREN
-			{: RESULT = new MethodCallExpr(e1, i, el); :}
-		| INTEGER_LITERAL:i
-			{: RESULT = new IntegerLiteralExpr(i); :}
+		| Expression:arrayName LBRACKET Expression:indexExpr RBRACKET
+			{: RESULT = new ArrayAccessExpr(arrayName, indexExpr); :}
+		| Expression:arrayName DOT LENGTH
+			{: RESULT = new ArrayLengthExpr(arrayName); :}
+		| Expression:owner DOT IDENTIFIER:methodName LPAREN ExpressionList:args RPAREN
+			{: RESULT = new MethodCallExpr(owner, methodName, args); :}
+		| INTEGER_LITERAL:num
+			{: RESULT = new IntegerLiteralExpr(num); :}
 		| TRUE
 			{: RESULT = new TrueExpr(); :}
 		| FALSE
@@ -349,10 +351,10 @@ Expression ::= Expression:e1 AND Expression:e2
 			{: RESULT = new IdentifierExpr(i); :}
 		| THIS
 			{: RESULT = new ThisExpr(); :}
-		| NEW INTEGER LBRACKET Expression:e RBRACKET
-			{: RESULT = new NewIntArrayExpr(e); :}
-		| NEW IDENTIFIER:i LPAREN RPAREN
-			{: RESULT = new NewObjectExpr(i); :}
+		| NEW INTEGER LBRACKET Expression:lengthExpr RBRACKET
+			{: RESULT = new NewIntArrayExpr(lengthExpr); :}
+		| NEW IDENTIFIER:className LPAREN RPAREN
+			{: RESULT = new NewObjectExpr(className); :}
 		| EXCLAMATION Expression:e
 			{: RESULT = new NotExpr(e); :}
 		| LPAREN Expression:e RPAREN
