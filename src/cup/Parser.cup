@@ -149,10 +149,13 @@ non terminal Statement statement;
 /***********************/
 /* OPERATOR PRECEDENCE */
 /***********************/
+precedence left EQUALS;
+precedence left AND;
+precedence left LESSTHAN;
 precedence left PLUS, MINUS;
 precedence left MULT;
-precedence left LESSTHAN, AND;
 precedence left EXCLAMATION;
+precedence left LBRACKET;
 precedence left DOT;
 
 /************************/
